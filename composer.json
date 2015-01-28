@@ -1,5 +1,12 @@
 {
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@git.sam-media.com:sam-tools/lib-sam.git"
+        }
+    ],
     "require": {
+        "sam-media/libsam": "0.9.5",
         "silex/silex": "~1.2"
     }
 }
