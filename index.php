@@ -9,93 +9,32 @@ use Symfony\Component\HttpFoundation\Response;
 
 $app = new Silex\Application();
 
-$requestTypes = array(
-    'PrepareInfo' => array(
-        'CustomerURL',
-        'M2M',
-        'Password',
-        'RequestID',
-        'ServiceID',
-        'ServiceType',
-        'Username',
-        'Version',
-    ),
-    'PrepareSubscription' => array(
-        'Category',
-        'ChargeFirstFee',
-        'ConfirmationURL',
-        'Currency',
-        'Description',
-        'Destination',
-        'ErrorURL',
-        'ItemFee',
-        'M2M',
-        'Password',
-        'ProductURL',
-        'PurchaseAboTool',
-        'PurchaseBanner',
-        'PurchaseContact',
-        'PurchaseDescription',
-        'PurchaseImage',
-        'PurchaseImprint',
-        'PurchaseTAC',
-        'ReplyPath',
-        'RequestID',
-        'RequestType',
-        'ServiceID',
-        'ServiceType',
-        'SubscriptionFee',
-        'Username',
-        'Version',
-    ),
-    'CheckTan' => array(
-        'M2M',
-        'Password',
-        'RequestID',
-        'RequestType',
-        'ServiceID',
-        'ServiceType',
-        'Tan',
-        'TransactionID',
-        'Username',
-        'Version',
-    ),
-    'QueryInfo' => array(
-        'Destination',
-        'M2M',
-        'Password',
-        'RequestID',
-        'RequestType',
-        'ServiceID',
-        'ServiceType',
-        'TransactionID',
-        'Username',
-        'Version',
-    ),
-);
-
-$keyPrefix = "netm::emulator::";
-
-$app->match('/transport/PaymentGateway', function (Request $request) use ($requestTypes, $keyPrefix) {
-    $requestId = $request->get('RequestID');
-
+$app->match('/transport/PaymentGateway', function (Request $request) {
     $requestType = $request->get('RequestType');
+
+    $requestTypes = array(
+        'CheckTan',
+        'PrepareInfo',
+        'PrepareSubscription',
+        'QueryInfo',
+    );
 
     if (!$requestType || !isset($requestTypes[$requestType])) {
         throw new Exception(sprintf("$requestType missing"));
     }
 
+    $requestId = $request->get('RequestID');
+
     $params = array();
     $params['TransactionID'] = $requestId;
-
     //$params['config'] = json_decode(base64_decode($requestId, true), true);
     $params['config'] = array();
     $params['config']['low_balance'] = false;
     $params['config']['flow'] = 'wap';
     $params['config']['msisdn'] = '00491711049395';
 
-    foreach ($requestTypes[$requestType] as $param) {
-        $params[$param] = $request->get($param);
+    foreach ($_REQUEST as $key => $value) {
+        $params[$key] = $value;
     }
 
     $prevParams = fromRedis($requestId);
@@ -108,7 +47,7 @@ $app->match('/transport/PaymentGateway', function (Request $request) use ($reque
     return new Response($requestType($requestId), 200, array('Content-Type' => 'application/xml'));
 });
 
-$app->match('/detectinfo', function (Request $request) use ($requestTypes, $keyPrefix) {
+$app->match('/detectinfo', function (Request $request) {
     $params = fromRedis($request->get('rid'));
 
     if ($params['config']['flow'] == 'wap') {
@@ -126,7 +65,7 @@ $app->match('/detectinfo', function (Request $request) use ($requestTypes, $keyP
     ));
 });
 
-$app->match('/paymenturl', function (Request $request) use ($requestTypes, $keyPrefix) {
+$app->match('/paymenturl', function (Request $request) {
     $requestId = $request->get('rid');
     $params = fromRedis($requestId);
 
@@ -139,10 +78,8 @@ $app->match('/paymenturl', function (Request $request) use ($requestTypes, $keyP
     return new Response($contents);
 });
 
-$app->match('/rid', function (Request $request) use ($requestTypes, $keyPrefix) {
-    $redis = new \LibSam\Cache\RedisCache();
-    $requestId = $request->get('rid');
-    $params = json_decode($redis->get($keyPrefix.$requestId), true);
+$app->match('/rid', function (Request $request) {
+    $params = fromRedis($request->get('rid'));
     die(var_dump($params));
 });
 
