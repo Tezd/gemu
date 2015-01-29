@@ -64,14 +64,22 @@ function CheckTan($requestId)
 {
     $params = fromRedis($requestId);
 
+    if ($params['Tan'] == '1234') {
+        $statusCode = 0;
+        $statusText = 'PIN correct';
+    } else {
+        $statusCode = 250;
+        $statusText = 'PIN wrong';
+    }
+
     $s = <<<HERE
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <Response type="CheckTan">
-  <StatusCode>0</StatusCode>
-  <StatusText>PIN correct</StatusText>
+  <StatusCode>$statusCode</StatusCode>
+  <StatusText>$statusText</StatusText>
   <TransactionType>synchronous</TransactionType>
-  <RequestID>${requestId}</RequestID>
-  <TransactionID>${requestId}</TransactionID>
+  <RequestID>$requestId</RequestID>
+  <TransactionID>$requestId</TransactionID>
 </Response>
 HERE;
 
