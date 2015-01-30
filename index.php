@@ -30,8 +30,9 @@ $app->match('/transport/PaymentGateway', function (Request $request) {
     //$params['config'] = json_decode(base64_decode($requestId, true), true);
     $params['config'] = array();
     $params['config']['low_balance'] = false;
-    $params['config']['flow'] = 'web';
-    $params['config']['msisdn'] = '00491711049396';
+    $params['config']['flow'] = 'wap';
+    $params['config']['msisdn'] = '00491711049388';
+    $params['config']['operator'] = '2';
 
     foreach ($_REQUEST as $key => $value) {
         $params[$key] = $value;
