@@ -6,20 +6,26 @@
 
     <body>
         <form method="GET">
-            Campaign Link: <input type="text" name="link"><br>
-            MSISDN: <input type="text" name="msisdn" value="<?php echo '0049' . rand(pow(10, 9), pow(10, 10)-1); ?>"><br>
-            Balance: <input type="text" name="balance" value="100"><br>
-
-            Operator:
-            <select name="operator">
-                <option value="tmobile">T-Mobile</option>
-                <option value="eplus">E-Plus</option>
-            </select>
-            <br>
-
-            WAP: <input type="radio" name="flow" value="wap" checked>
-            WEB: <input type="radio" name="flow" value="web">
-            <br>
+            <p>
+                Campaign Link: <input type="text" name="link">
+            </p>
+            <p>
+                MSISDN: <input type="text" name="msisdn" value="<?php echo '0049' . rand(pow(10, 9), pow(10, 10)-1); ?>">
+                Low balance: <input type="checkbox" name="low_balance" value="1"><br>
+            </p>
+            <p>
+                Operator:
+                <select name="operator">
+                    <option value="1">T-Mobile</option>
+                    <option value="2">Vodafone</option>
+                    <option value="3">E-Plus</option>
+                    <option value="4">O2</option>
+                </select>
+            </p>
+            <p>
+                WAP: <input type="radio" name="flow" value="wap" checked>
+                WEB: <input type="radio" name="flow" value="web">
+            </p>
 
             <input type="submit" name="submit" value="Generate link">
         </form>
@@ -38,6 +44,8 @@ if (isset($_GET['submit'])) {
     }
 
     $config['t'] = microtime(true);
+
+    var_dump($config);
 
     $rid = base64_encode(json_encode($config));
     $link = $_GET['link'] . '&rid=' . $rid;
