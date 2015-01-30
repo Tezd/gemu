@@ -1,5 +1,13 @@
 <?php
 
+class Operator
+{
+    public static function isHostedExternaly($operatorId)
+    {
+        return $operatorId > 2;
+    }
+}
+
 function toRedis($requestId, $params)
 {
     $redis = new \LibSam\Cache\RedisCache();
@@ -31,6 +39,7 @@ HERE;
     return $s;
 }
 
+
 function PrepareSubscription($requestId)
 {
     $params = fromRedis($requestId);
@@ -42,6 +51,15 @@ function PrepareSubscription($requestId)
     } else {
         $statusCode = 0;
         $statusText = 'OK';
+    }
+
+    if(Operator::isHostedExternaly($params['config']['operator']))
+    {
+        $fContent = file_get_contents('optin.html');
+        $fContent = str_replace('$BANNER', $params['PurchaseBanner'], $fContent);
+        $fContent = str_replace('$IMAGE', $params['PurchaseImage'], $fContent);
+        $fContent = str_replace('$URL', $infoUrl, $fContent);
+        return $fContent;
     }
 
     $s = <<<HERE
@@ -110,8 +128,8 @@ function QueryInfo($requestId)
   <StatusText>OK</StatusText>
   <RequestID>${requestId}</RequestID>
   <TransactionID>${requestId}</TransactionID>
-  <OperatorID>1</OperatorID>
-  <PaymentOperatorID>1</PaymentOperatorID>
+  <OperatorID>{$params['config']['operator']}</OperatorID>
+  <PaymentOperatorID>{$params['config']['operator']}</PaymentOperatorID>
   <Description>{$params['Description']}</Description>
   <Destination>${msisdn}</Destination>
   <TransactionStatusCode>1</TransactionStatusCode>

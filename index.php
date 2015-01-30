@@ -7,6 +7,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+
+
 $app = new Silex\Application();
 
 $app->match('/transport/PaymentGateway', function (Request $request) {
@@ -32,7 +34,7 @@ $app->match('/transport/PaymentGateway', function (Request $request) {
     $params['config']['low_balance'] = false;
     $params['config']['flow'] = 'wap';
     $params['config']['msisdn'] = '00491711049388';
-    $params['config']['operator'] = '2';
+    $params['config']['operator'] = '3';
 
     foreach ($_REQUEST as $key => $value) {
         $params[$key] = $value;
@@ -69,11 +71,20 @@ $app->match('/detectinfo', function (Request $request) {
 $app->match('/paymenturl', function (Request $request) {
     $requestId = $request->get('rid');
     $params = fromRedis($requestId);
+    $url = $params['ProductURL'] . '?rid=' . $requestId;
+
+    if(Operator::isHostedExternaly($params['config']['operator']))
+    {
+        $fContent = file_get_contents('optin.html');
+        $fContent = str_replace('$BANNER', $params['PurchaseBanner'], $fContent);
+        $fContent = str_replace('$IMAGE', $params['PurchaseImage'], $fContent);
+        $fContent = str_replace('$URL', $url, $fContent);
+        return new Response($fContent);
+    }
 
     $confirmationURL = 'http://172.19.0.2' . parse_url("http://mcb-test.sam-media.com:8082/mcb-ads/optin2.php/SWINGCOPTERS", PHP_URL_PATH);
 
     $contents = file_get_contents($confirmationURL);
-    $url = $params['ProductURL'] . '?rid=' . $requestId;
     $contents = str_replace('$PRODUCT_URL', $url, $contents);
 
     return new Response($contents);
