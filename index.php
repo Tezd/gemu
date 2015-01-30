@@ -33,7 +33,7 @@ $app->match('/transport/PaymentGateway', function (Request $request) {
     $params['config'] = array();
     $params['config']['low_balance'] = false;
     $params['config']['flow'] = 'wap';
-    $params['config']['msisdn'] = '00491711049388';
+    $params['config']['msisdn'] = '00491711049389';
     $params['config']['operator'] = '3';
 
     foreach ($_REQUEST as $key => $value) {
@@ -68,14 +68,29 @@ $app->match('/detectinfo', function (Request $request) {
     ));
 });
 
+$app->match('/optin', function (Request $request) {
+    $requestId = $request->get('rid');
+    $params = fromRedis($requestId);
+
+    $url = 'http://' . $_SERVER['HTTP_HOST'] . '/netm-emulator/index.php/paymenturl?rid=' . $requestId;
+    $fContent = file_get_contents('optin.html');
+    $fContent = str_replace('$TITLE', 'Opt-in 1', $fContent);
+    $fContent = str_replace('$BANNER', $params['PurchaseBanner'], $fContent);
+    $fContent = str_replace('$IMAGE', $params['PurchaseImage'], $fContent);
+    $fContent = str_replace('$URL', $url, $fContent);
+
+    return new Response($fContent);
+});
+
 $app->match('/paymenturl', function (Request $request) {
     $requestId = $request->get('rid');
     $params = fromRedis($requestId);
     $url = $params['ProductURL'] . '?rid=' . $requestId;
 
-    if(Operator::isHostedExternaly($params['config']['operator']))
+    if (Operator::isHostedExternaly($params['config']['operator']))
     {
         $fContent = file_get_contents('optin.html');
+        $fContent = str_replace('$TITLE', 'Opt-in 2', $fContent);
         $fContent = str_replace('$BANNER', $params['PurchaseBanner'], $fContent);
         $fContent = str_replace('$IMAGE', $params['PurchaseImage'], $fContent);
         $fContent = str_replace('$URL', $url, $fContent);

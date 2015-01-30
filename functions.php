@@ -53,13 +53,8 @@ function PrepareSubscription($requestId)
         $statusText = 'OK';
     }
 
-    if(Operator::isHostedExternaly($params['config']['operator']))
-    {
-        $fContent = file_get_contents('optin.html');
-        $fContent = str_replace('$BANNER', $params['PurchaseBanner'], $fContent);
-        $fContent = str_replace('$IMAGE', $params['PurchaseImage'], $fContent);
-        $fContent = str_replace('$URL', $infoUrl, $fContent);
-        return $fContent;
+    if (Operator::isHostedExternaly($params['config']['operator'])) {
+        $infoUrl = 'http://' . $_SERVER['HTTP_HOST'] . '/netm-emulator/index.php/optin?rid=' . $requestId;
     }
 
     $s = <<<HERE
