@@ -4,7 +4,7 @@
     if (isset($_REQUEST['msisdn']) && $_REQUEST['msisdn']) {
         $msisdn = $_REQUEST['msisdn'];
 
-        if ($_REQUEST['flow'] == 'wap') {
+        if ($_REQUEST['flow'] == '3g') {
             $_REQUEST['msisdn'] = '0049' . substr($msisdn, 1);
         }
     }
@@ -19,7 +19,7 @@
         unset($config['link']);
         unset($config['submit']);
 
-        if (@$config['flow'] == 'web') {
+        if (@$config['flow'] == 'wifi') {
             unset($config['msisdn']);
         }
 
@@ -66,8 +66,8 @@
                 <input type="radio" name="operator" value="4" <?php echo (isset($_REQUEST['operator']) && $_REQUEST['operator'] == '4') ? 'checked' : ''; ?>> O2<br>
             </p>
             <p>
-                <input type="radio" name="flow" value="web" <?php echo (isset($_REQUEST['flow']) && $_REQUEST['flow'] == 'web') ? 'checked' : ''; echo $checked; ?>> WEB Flow<br>
-                <input type="radio" name="flow" value="wap" <?php echo (isset($_REQUEST['flow']) && $_REQUEST['flow'] == 'wap') ? 'checked' : '' ?>> WAP Flow<br>
+                <input type="radio" name="flow" value="wifi" <?php echo (isset($_REQUEST['flow']) && $_REQUEST['flow'] == 'wifi') ? 'checked' : ''; echo $checked; ?>> Wifi Flow<br>
+                <input type="radio" name="flow" value="3g" <?php echo (isset($_REQUEST['flow']) && $_REQUEST['flow'] == '3g') ? 'checked' : '' ?>> 3G Flow<br>
             </p>
 
             <input type="submit" name="submit" value="Generate link">

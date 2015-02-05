@@ -8,7 +8,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 
-
 $app = new Silex\Application();
 
 $app->match('/transport/PaymentGateway', function (Request $request) {
@@ -37,7 +36,7 @@ $app->match('/transport/PaymentGateway', function (Request $request) {
     } else {
         $params['config'] = array();
         $params['config']['low_balance'] = false;
-        $params['config']['flow'] = 'wap';
+        $params['config']['flow'] = '3g';
         $params['config']['msisdn'] = '00491711049389';
         $params['config']['operator'] = '3';
     }
@@ -59,7 +58,7 @@ $app->match('/transport/PaymentGateway', function (Request $request) {
 $app->match('/detectinfo', function (Request $request) {
     $params = fromRedis($request->get('rid'));
 
-    if ($params['config']['flow'] == 'wap') {
+    if ($params['config']['flow'] == '3g') {
         $code = '0';
     } else {
         $code = '151';
