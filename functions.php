@@ -105,7 +105,7 @@ function QueryInfo($requestId)
 
     $now = date('Y-m-d H:i:s');
 
-    if ($params['config']['flow'] == 'wap') {
+    if ($params['config']['flow'] == '3g') {
         $msisdn = $params['config']['msisdn'];
     } else {
         $msisdn = $params['Destination'];
