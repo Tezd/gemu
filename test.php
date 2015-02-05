@@ -75,6 +75,30 @@
 
         <p><?php echo $output; ?></p>
 
+        <?php
+            if (isset($_REQUEST['submit'])) {
+        ?>
+
+<hr>
+<h3>Logs</h3>
+<ol id="log"></ol>
+<script>
+    var src = new EventSource('<?php echo "logs.php?rid=$rid"; ?>');
+
+    src.onmessage = function(e) {
+        console.log(e.data);
+        var el = document.createElement('li');
+        el.innerHTML = e.data;
+
+        document.getElementById('log').appendChild(el);
+    };
+</script>
+
+        <?php
+            }
+        ?>
+
+
     </body>
 </html>
 

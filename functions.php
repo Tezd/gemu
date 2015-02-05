@@ -20,6 +20,18 @@ function fromRedis($requestId)
     return json_decode($redis->get('netm::emulator::'.$requestId), true);
 }
 
+function putLog($requestId, $log)
+{
+    $queue = \LibSam\Queue\Redis::getInstance();
+    $queue->store('netm::emulator::'.$requestId, $log);
+}
+
+function getLog($requestId)
+{
+    $queue = \LibSam\Queue\Redis::getInstance();
+    return $queue->restore('netm::emulator::'.$requestId);
+}
+
 function PrepareInfo($requestId)
 {
     $params = fromRedis($requestId);
@@ -80,9 +92,14 @@ function CheckTan($requestId)
     if ($params['Tan'] == '1234') {
         $statusCode = 0;
         $statusText = 'PIN correct';
+
+        putLog($requestId, 'Pin verified');
+        putLog($requestId, 'Subscription successful');
     } else {
         $statusCode = 250;
         $statusText = 'PIN wrong';
+
+        putLog($requestId, 'Invalid pin');
     }
 
     $s = <<<HERE
