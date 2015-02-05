@@ -52,15 +52,20 @@ $app->match('/transport/PaymentGateway', function (Request $request) {
 
     toRedis($requestId, $params);
 
+    putLog($requestId, "$requestType call received");
+
     return new Response($requestType($requestId), 200, array('Content-Type' => 'application/xml'));
 });
 
 $app->match('/detectinfo', function (Request $request) {
-    $params = fromRedis($request->get('rid'));
+    $requestId = $request->get('rid');
+    $params = fromRedis($requestId);
 
     if ($params['config']['flow'] == '3g') {
+        putLog($requestId, 'msisdn detected. doing 3g flow');
         $code = '0';
     } else {
+        putLog($requestId, 'msisdn not detected. doing wifi flow');
         $code = '151';
     }
 
@@ -90,7 +95,8 @@ $app->match('/optin', function (Request $request) {
 $app->match('/paymenturl', function (Request $request) {
     $requestId = $request->get('rid');
     $params = fromRedis($requestId);
-    $url = $params['ProductURL'] . '?rid=' . $requestId;
+    //$url = $params['ProductURL'] . '?rid=' . $requestId;
+    $url = 'http://' . $_SERVER['HTTP_HOST'] . '/netm-emulator/index.php/confirm?rid=' . $requestId;
 
     if (Operator::isHostedExternaly($params['config']['operator']))
     {
@@ -102,10 +108,22 @@ $app->match('/paymenturl', function (Request $request) {
         return new Response($fContent);
     }
 
+    $params['ConfirmationURL'] = 'http://172.19.0.2' . parse_url($params['ConfirmationURL'], PHP_URL_PATH);
+
     $contents = file_get_contents($params['ConfirmationURL']);
     $contents = str_replace('$PRODUCT_URL', $url, $contents);
 
     return new Response($contents);
+});
+
+$app->match('/confirm', function (Request $request) {
+    $requestId = $request->get('rid');
+    $params = fromRedis($requestId);
+
+    putLog($requestId, 'Subscription successful');
+
+    $url = $params['ProductURL'] . '?rid=' . $requestId;
+    return new RedirectResponse($url);
 });
 
 $app->match('/rid', function (Request $request) {
