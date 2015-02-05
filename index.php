@@ -103,9 +103,7 @@ $app->match('/paymenturl', function (Request $request) {
         return new Response($fContent);
     }
 
-    $confirmationURL = 'http://172.19.0.2' . parse_url("http://mcb-test.sam-media.com:8082/mcb-ads/optin2.php/SWINGCOPTERS", PHP_URL_PATH);
-
-    $contents = file_get_contents($confirmationURL);
+    $contents = file_get_contents($params['ConfirmationURL']);
     $contents = str_replace('$PRODUCT_URL', $url, $contents);
 
     return new Response($contents);
