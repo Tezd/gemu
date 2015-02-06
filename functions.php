@@ -66,6 +66,7 @@ function PrepareSubscription($requestId)
     }
 
     if (Operator::isHostedExternaly($params['config']['operator'])) {
+        putLog($requestId, 'Operator hosts optin1 and optin2 pages.');
         $infoUrl = 'http://' . $_SERVER['HTTP_HOST'] . '/netm-emulator/index.php/optin?rid=' . $requestId;
     }
 
@@ -94,7 +95,8 @@ function CheckTan($requestId)
         $statusText = 'PIN correct';
 
         putLog($requestId, 'Pin verified');
-        putLog($requestId, 'Subscription successful');
+        $subId = substr($requestId, 0, 48);
+        putLog($requestId, 'Subscription successful. Subscription ID: ' . $subId);
     } else {
         $statusCode = 250;
         $statusText = 'PIN wrong';

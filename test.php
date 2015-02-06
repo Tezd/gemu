@@ -1,44 +1,67 @@
 <?php
-    $link = isset($_REQUEST['link']) ? $_REQUEST['link'] : '';
 
-    if (isset($_REQUEST['msisdn']) && $_REQUEST['msisdn']) {
-        $msisdn = $_REQUEST['msisdn'];
+require_once __DIR__.'/vendor/autoload.php';
 
-        if ($_REQUEST['flow'] == '3g') {
-            $_REQUEST['msisdn'] = '0049' . substr($msisdn, 1);
-        }
+use Guzzle\Http\Client;
+use Guzzle\Http\Message\Response;
+
+$link = isset($_REQUEST['link']) ? $_REQUEST['link'] : '';
+
+if (isset($_REQUEST['msisdn']) && $_REQUEST['msisdn']) {
+    $msisdn = $_REQUEST['msisdn'];
+
+    if ($_REQUEST['flow'] == '3g') {
+        $_REQUEST['msisdn'] = '0049' . substr($msisdn, 1);
+    }
+}
+
+if (isset($_REQUEST['submit'])) {
+    $config = array(
+        't' => microtime(true),
+    );
+
+    $config = array_merge($config, $_REQUEST);
+
+    unset($config['link']);
+    unset($config['submit']);
+
+    if (@$config['flow'] == 'wifi') {
+        unset($config['msisdn']);
     }
 
-    if (isset($_REQUEST['submit'])) {
-        $config = array(
-            't' => microtime(true),
-        );
+    $rid = base64_encode(json_encode($config));
 
-        $config = array_merge($config, $_REQUEST);
+    $output = array();
 
-        unset($config['link']);
-        unset($config['submit']);
+    $url = $link;
 
-        if (@$config['flow'] == 'wifi') {
-            unset($config['msisdn']);
+    /*
+    try {
+        $client = new Client(null, array('redirect.disable' => true));
+        $request = $client->get($link);
+        $response = $request->send();
+        $statusCode = $response->getStatusCode();
+        if ($statusCode == 301 || $statusCode == 302) {
+            $url = (string)$response->getHeader('Location');
+            $output[] = sprintf("<p><strong>%s</strong> redirects to <strong>%s</strong></p>\n", $link, $url);
         }
-
-        $rid = base64_encode(json_encode($config));
-
-        $output = array();
-
-        $url = $link . '&emulate=1&rid=' . $rid;
-        $output[] = sprintf("<a target=\"_blank\" href=\"%s\">%s</a>\n", $url, $url);
-        $output[] = sprintf("<p>MSISDN: %s</p>\n", $msisdn);
-
-        $output = join('', $output);
-
-        $checked = '';
-    } else {
-        $msisdn = '0' . rand(pow(10, 9), pow(10, 10)-1);
-        $output = '';
-        $checked = 'checked';
+    } catch (Exception $e) {
+        die($e->getMessage());
     }
+     */
+
+    $url = $url . '&emulate=1&rid=' . $rid;
+    $output[] = sprintf("<a target=\"_blank\" href=\"%s\">%s</a>\n", $url, $url);
+    $output[] = sprintf("<p>MSISDN: %s</p>\n", $msisdn);
+
+    $output = join('', $output);
+
+    $checked = '';
+} else {
+    $msisdn = '0' . rand(pow(10, 9), pow(10, 10)-1);
+    $output = '';
+    $checked = 'checked';
+}
 
 ?>
 

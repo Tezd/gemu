@@ -41,7 +41,10 @@ $app->match('/transport/PaymentGateway', function (Request $request) {
         $params['config']['operator'] = '3';
     }
 
+    putLog($requestId, "$requestType call received");
+
     foreach ($_REQUEST as $key => $value) {
+        //putLog($requestId, "Got param: $key => $value");
         $params[$key] = $value;
     }
 
@@ -52,8 +55,6 @@ $app->match('/transport/PaymentGateway', function (Request $request) {
 
     toRedis($requestId, $params);
 
-    putLog($requestId, "$requestType call received");
-
     return new Response($requestType($requestId), 200, array('Content-Type' => 'application/xml'));
 });
 
@@ -62,10 +63,10 @@ $app->match('/detectinfo', function (Request $request) {
     $params = fromRedis($requestId);
 
     if ($params['config']['flow'] == '3g') {
-        putLog($requestId, 'msisdn detected. doing 3g flow');
+        putLog($requestId, sprintf("MSISDN detected as %s. Initiating  3G flow.", $params['config']['msisdn']));
         $code = '0';
     } else {
-        putLog($requestId, 'msisdn not detected. doing wifi flow');
+        putLog($requestId, 'MSISDN not detected. Initiating Wifi flow.');
         $code = '151';
     }
 
@@ -88,6 +89,8 @@ $app->match('/optin', function (Request $request) {
     $fContent = str_replace('$BANNER', $params['PurchaseBanner'], $fContent);
     $fContent = str_replace('$IMAGE', $params['PurchaseImage'], $fContent);
     $fContent = str_replace('$URL', $url, $fContent);
+
+    putLog($requestId, 'Going to Optin1 page.');
 
     return new Response($fContent);
 });
@@ -113,6 +116,8 @@ $app->match('/paymenturl', function (Request $request) {
     $contents = file_get_contents($params['ConfirmationURL']);
     $contents = str_replace('$PRODUCT_URL', $url, $contents);
 
+    putLog($requestId, 'Going to Optin2 page.');
+
     return new Response($contents);
 });
 
@@ -120,7 +125,8 @@ $app->match('/confirm', function (Request $request) {
     $requestId = $request->get('rid');
     $params = fromRedis($requestId);
 
-    putLog($requestId, 'Subscription successful');
+    $subId = substr($requestId, 0, 48);
+    putLog($requestId, 'Subscription successful. Subscription ID: ' . $subId);
 
     $url = $params['ProductURL'] . '?rid=' . $requestId;
     return new RedirectResponse($url);
