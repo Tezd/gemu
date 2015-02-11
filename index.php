@@ -10,6 +10,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 $app = new Silex\Application();
 
+$app->match('/', function (Request $request) {
+    $url = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . 'test.php';
+    return new RedirectResponse($url);
+});
+
 $app->match('/transport/PaymentGateway', function (Request $request) {
     $requestType = $request->get('RequestType');
 
