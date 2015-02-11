@@ -83,7 +83,8 @@ $app->match('/optin', function (Request $request) {
     $requestId = $request->get('rid');
     $params = fromRedis($requestId);
 
-    $url = 'http://' . $_SERVER['HTTP_HOST'] . '/netm-emulator/index.php/paymenturl?rid=' . $requestId;
+    $url = makeUrl('/paymenturl', $requestId);
+
     $fContent = file_get_contents('optin.html');
     $fContent = str_replace('$TITLE', 'Opt-in 1', $fContent);
     $fContent = str_replace('$BANNER', $params['PurchaseBanner'], $fContent);
@@ -98,8 +99,8 @@ $app->match('/optin', function (Request $request) {
 $app->match('/paymenturl', function (Request $request) {
     $requestId = $request->get('rid');
     $params = fromRedis($requestId);
-    //$url = $params['ProductURL'] . '?rid=' . $requestId;
-    $url = 'http://' . $_SERVER['HTTP_HOST'] . '/netm-emulator/index.php/confirm?rid=' . $requestId;
+
+    $url = makeUrl('/confirm', $requestId);
 
     if (Operator::isHostedExternaly($params['config']['operator']))
     {
@@ -110,8 +111,6 @@ $app->match('/paymenturl', function (Request $request) {
         $fContent = str_replace('$URL', $url, $fContent);
         return new Response($fContent);
     }
-
-    $params['ConfirmationURL'] = 'http://172.19.0.2' . parse_url($params['ConfirmationURL'], PHP_URL_PATH);
 
     $contents = file_get_contents($params['ConfirmationURL']);
     $contents = str_replace('$PRODUCT_URL', $url, $contents);
