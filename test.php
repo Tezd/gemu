@@ -17,7 +17,7 @@ if (isset($_REQUEST['msisdn']) && $_REQUEST['msisdn']) {
 
 if (isset($_REQUEST['submit'])) {
     $config = array(
-        't' => microtime(true),
+        't' => strrev((string)microtime(true)),
     );
 
     $config = array_merge($config, $_REQUEST);
@@ -35,7 +35,6 @@ if (isset($_REQUEST['submit'])) {
 
     $url = $link;
 
-    /*
     try {
         $client = new Client(null, array('redirect.disable' => true));
         $request = $client->get($link);
@@ -48,7 +47,6 @@ if (isset($_REQUEST['submit'])) {
     } catch (Exception $e) {
         die($e->getMessage());
     }
-     */
 
     $url = $url . '&emulate=1&rid=' . $rid;
     $output[] = sprintf("<a target=\"_blank\" href=\"%s\">%s</a>\n", $url, $url);

@@ -8,6 +8,21 @@ class Operator
     }
 }
 
+function makeUrl($route, $requestId = null)
+{
+    $url = join('',
+        array(
+            'http://', $_SERVER['HTTP_HOST'], $_SERVER['SCRIPT_NAME'], $route,
+        )
+    );
+
+    if ($requestId) {
+        $url = $url . '?rid=' . $requestId;
+    }
+
+    return $url;
+}
+
 function toRedis($requestId, $params)
 {
     $redis = new \LibSam\Cache\RedisCache();
@@ -35,7 +50,7 @@ function getLog($requestId)
 function PrepareInfo($requestId)
 {
     $params = fromRedis($requestId);
-    $infoUrl = 'http://' . $_SERVER['HTTP_HOST'] . '/netm-emulator/index.php/detectinfo';
+    $infoUrl = makeUrl('/detectinfo');
 
     $s = <<<HERE
 <?xml version="1.0" encoding="ISO-8859-1"?>
@@ -55,7 +70,7 @@ HERE;
 function PrepareSubscription($requestId)
 {
     $params = fromRedis($requestId);
-    $infoUrl = 'http://' . $_SERVER['HTTP_HOST'] . '/netm-emulator/index.php/paymenturl?rid=' . $requestId;
+    $infoUrl = makeUrl('/paymenturl', $requestId);
 
     if ($params['config']['low_balance']) {
         $statusCode = 305;
@@ -67,7 +82,7 @@ function PrepareSubscription($requestId)
 
     if (Operator::isHostedExternaly($params['config']['operator'])) {
         putLog($requestId, 'Operator hosts optin1 and optin2 pages.');
-        $infoUrl = 'http://' . $_SERVER['HTTP_HOST'] . '/netm-emulator/index.php/optin?rid=' . $requestId;
+        $infoUrl = makeUrl('/optin', $requestId);
     }
 
     $s = <<<HERE
