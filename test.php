@@ -70,6 +70,7 @@ if (isset($_REQUEST['submit'])) {
     </head>
 
     <body>
+        <p><a href="<?php echo 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; ?>">Home</a></p>
         <form method="POST">
             <p>
                 Campaign Link:
