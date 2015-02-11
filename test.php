@@ -48,7 +48,7 @@ if (isset($_REQUEST['submit'])) {
         die($e->getMessage());
     }
 
-    $url = $url . '&emulate=1&rid=' . $rid;
+    $url = $url . '&emulate=1&rid=' . urlencode($rid);
     $output[] = sprintf("<a target=\"_blank\" href=\"%s\">%s</a>\n", $url, $url);
     $output[] = sprintf("<p>MSISDN: %s</p>\n", $msisdn);
 
