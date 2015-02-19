@@ -8,5 +8,10 @@
     "require": {
         "sam-media/libsam": "0.9.5",
         "silex/silex": "~1.2"
+    },
+    "autoload": {
+        "psr-0": {
+            "Gemu": "src/"
+        }
     }
 }

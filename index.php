@@ -141,6 +141,7 @@ $app->match('/rid', function (Request $request) {
     die(var_dump($params));
 });
 
+$app->mount('/api/sms', include __DIR__ . '/sms.php');
 
 $app['debug'] = true;
 $app->run();
