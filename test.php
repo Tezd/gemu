@@ -6,6 +6,7 @@ use Guzzle\Http\Client;
 use Guzzle\Http\Message\Response;
 
 $link = isset($_REQUEST['link']) ? $_REQUEST['link'] : '';
+$isBehat = isset($_REQUEST['is_behat']) ? (bool)$_REQUEST['is_behat'] : false;
 
 if (isset($_REQUEST['msisdn']) && $_REQUEST['msisdn']) {
     $msisdn = $_REQUEST['msisdn'];
@@ -49,6 +50,12 @@ if (isset($_REQUEST['submit'])) {
     }
 
     $url = $url . '&emulate=1&rid=' . urlencode($rid);
+
+    if ($isBehat) {
+        header("Location: $url");
+        die();
+    }
+
     $output[] = sprintf("<a target=\"_blank\" href=\"%s\">%s</a>\n", $url, $url);
     $output[] = sprintf("<p>MSISDN: %s</p>\n", $msisdn);
 
@@ -75,7 +82,7 @@ if (isset($_REQUEST['submit'])) {
             <p>
                 Campaign Link:
                 <br><br>
-                <textarea style="width: 640px;" type="text" name="link" rows="3" cols="30"><?php echo $link; ?></textarea>
+                <textarea id="campaign-link" style="width: 640px;" type="text" name="link" rows="3" cols="30"><?php echo $link; ?></textarea>
             </p>
             <p>
                 MSISDN: <input type="text" name="msisdn" value="<?php echo $msisdn; ?>">
