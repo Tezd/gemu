@@ -85,7 +85,7 @@ if (isset($_REQUEST['submit'])) {
                 <textarea id="campaign-link" style="width: 640px;" type="text" name="link" rows="3" cols="30"><?php echo $link; ?></textarea>
             </p>
             <p>
-                MSISDN: <input type="text" name="msisdn" value="<?php echo $msisdn; ?>">
+                MSISDN: <input id="msisdn" type="text" name="msisdn" value="<?php echo $msisdn; ?>">
                 <!-- Low balance: <input type="checkbox" name="low_balance" value="1"><br> -->
             </p>
             <p>
