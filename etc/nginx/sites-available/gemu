@@ -1,0 +1,25 @@
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server ipv6only=on;
+
+    root /var/www/html/gemu;
+
+    server_name localhost gemu.local;
+    index index.hh index.php index.html;
+
+    location / {
+        try_files $uri $uri/ /index.hh;
+    }
+
+    location ~ \.(hh)$ {
+        fastcgi_keep_conn on;
+        fastcgi_pass   gemu.local:9000;
+        fastcgi_index  index.hh;
+        fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include        fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}

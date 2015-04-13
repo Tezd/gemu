@@ -1,0 +1,21 @@
+gemu:
+  build: .
+  links:
+  - redis:redis.local
+  environment:
+      SAM_ENV: development
+  volumes:
+  - .:/var/www/html/gemu
+  - /var/log:/var/log
+  working_dir: /var/www/html/gemu
+nginx:
+  image: nginx
+  ports:
+    - "8005:80"
+  links:
+    - gemu:gemu.local
+  restart: always
+  volumes:
+    - etc/nginx/sites-available/gemu:/etc/nginx/conf.d/default.conf:ro
+redis:
+  image: redis
