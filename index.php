@@ -125,6 +125,22 @@ $app->match('/paymenturl', function (Request $request) {
     return new Response($contents);
 });
 
+$app->match('/o2msisdn', function (Request $request) {
+    $requestId = $request->get('rid');
+    $params = fromRedis($requestId);
+
+    $q = http_build_query(
+        array(
+            'rid' => $requestId,
+            'code' => 0,
+            'sid' => $requestId,
+        )
+    );
+
+    $url = $params['ProductURL'] . "?$q";
+    return new RedirectResponse($url);
+});
+
 $app->match('/confirm', function (Request $request) {
     $requestId = $request->get('rid');
     $params = fromRedis($requestId);

@@ -26,7 +26,7 @@ if (isset($_REQUEST['submit'])) {
     unset($config['link']);
     unset($config['submit']);
 
-    if (@$config['flow'] == 'wifi') {
+    if (@$config['flow'] == 'wifi' && $config['operator'] != 4) {
         unset($config['msisdn']);
     }
 
@@ -36,6 +36,7 @@ if (isset($_REQUEST['submit'])) {
 
     $url = $link;
 
+    /*
     try {
         $client = new Client(null, array('redirect.disable' => true));
         $request = $client->get($link);
@@ -48,6 +49,7 @@ if (isset($_REQUEST['submit'])) {
     } catch (Exception $e) {
         die($e->getMessage());
     }
+     */
 
     $url = $url . '&emulate=1&rid=' . urlencode($rid);
 
