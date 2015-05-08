@@ -70,7 +70,7 @@ HERE;
 function PrepareSubscription($requestId)
 {
     $params = fromRedis($requestId);
-    $infoUrl = makeUrl('/paymenturl', $requestId);
+    $paymentUrl = makeUrl('/paymenturl', $requestId);
 
     if ($params['config']['low_balance']) {
         $statusCode = 305;
@@ -82,7 +82,12 @@ function PrepareSubscription($requestId)
 
     if (Operator::isHostedExternaly($params['config']['operator'])) {
         putLog($requestId, 'Operator hosts optin1 and optin2 pages.');
-        $infoUrl = makeUrl('/optin', $requestId);
+        $paymentUrl = makeUrl('/optin', $requestId);
+    }
+
+    // special case of o2 wifi
+    if ($params['config']['operator'] == 4 && $params['config']['flow'] == 'wifi') {
+        $paymentUrl = makeUrl('/o2msisdn', $requestId);
     }
 
     $s = <<<HERE
@@ -94,7 +99,7 @@ function PrepareSubscription($requestId)
   <RequestID>${requestId}</RequestID>
   <TransactionID>${requestId}</TransactionID>
   <ValidityPeriod>216000</ValidityPeriod>
-  <PaymentURL>${infoUrl}</PaymentURL>
+  <PaymentURL>${paymentUrl}</PaymentURL>
 </Response>
 HERE;
 
@@ -139,7 +144,7 @@ function QueryInfo($requestId)
 
     $now = date('Y-m-d H:i:s');
 
-    if ($params['config']['flow'] == '3g') {
+    if ($params['config']['flow'] == '3g' || $params['config']['operator'] == 4) {
         $msisdn = $params['config']['msisdn'];
     } else {
         $msisdn = $params['Destination'];
