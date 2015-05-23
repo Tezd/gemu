@@ -58,7 +58,7 @@ if (isset($_REQUEST['submit'])) {
         die();
     }
 
-    $output[] = sprintf("<a target=\"_blank\" href=\"%s\">%s</a>\n", $url, $url);
+    $output[] = sprintf("<a target=\"_blank\" href=\"http://%s\">%s</a>\n", $url, $url);
     $output[] = sprintf("<p>MSISDN: %s</p>\n", $msisdn);
 
     $output = join('', $output);

@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <title>Gemu Homepage</title>
+        <link type="text/css" rel="stylesheet" href="{{app.request.base_path}}/gemu/web/assets/css/materialize.min.css">
+        <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+        <script type="text/javascript" src="{{app.request.base_path}}/gemu/web/assets/js/materialize.min.js"></script>
+    </head>
+    <body>
+        <section>
+            <div class="row">
+                <div class="row">
+                    <div class="input-field col s12">
+                        <textarea id="campaign-link" class="materialize-textarea"></textarea>
+                        <label for="textarea1">Textarea</label>
+                    </div>
+                </div>
+            </div>
+            <p>
+                MSISDN: <input id="msisdn" type="text" name="msisdn" value="">
+                <!-- Low balance: <input type="checkbox" name="low_balance" value="1"><br> -->
+            </p>
+            <p>
+                <input type="radio" name="operator" value="1"> T-Mobile<br>
+                <input type="radio" name="operator" value="2"> Vodafone<br>
+                <input type="radio" name="operator" value="3"> E-Plus<br>
+                <input type="radio" name="operator" value="4"> O2<br>
+            </p>
+            <p>
+                <input type="radio" name="flow" value="wifi"> Wifi Flow<br>
+                <input type="radio" name="flow" value="3g"> 3G Flow<br>
+            </p>
+
+            <input type="submit" name="submit" value="Generate link">
+        </section>
+    </body>
+</html>
