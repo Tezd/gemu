@@ -1,26 +1,26 @@
 <?php
 
-namespace Gemu\Core;
+namespace Gemu\Core\Gateway\Response;
 
 use Gemu\Core\Cache;
 use Gemu\Core\Error\BadEndPoint;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Class Controller
- * @package Gemu\Core\MVC
+ * Class Emulator
+ * @package Gemu\Gateway\Response
  */
-class Gateway
+abstract class Emulator
 {
-    /**
-     * @type array
-     */
-    protected $params;
-
     /**
      * @type \Gemu\Core\Cache
      */
     protected $cache;
+
+    /**
+     * @type array
+     */
+    protected $params;
 
     /**
      * @param \Gemu\Core\Cache $cache
@@ -37,7 +37,7 @@ class Gateway
      * @return mixed
      * @throws \Gemu\Core\Error\BadEndPoint
      */
-    public function handle(Request $request)
+    public function emulate(Request $request)
     {
         $endPoint = $this->getEndPoint($request);
         if(!method_exists($this, $endPoint)) {
@@ -55,32 +55,19 @@ class Gateway
     }
 
     /**
+     * Get method which we need to invoke inside emulator based on request
+     *
      * @param \Symfony\Component\HttpFoundation\Request $request
      *
-     * @return mixed
+     * @return string
      */
-    protected function getEndPoint(Request $request)
-    {
-        return $request->attributes->get('endPoint');
-    }
+    protected abstract function getEndPoint(Request $request);
 
     /**
+     * Initializes parameters for use inside of other emulator invoked methods
      * @param \Symfony\Component\HttpFoundation\Request $request
+     *
+     * @return void
      */
-    protected function initParams(Request $request)
-    {
-        $rid = $request->query->get('RequestID');
-        $this->params = array_merge(
-            $this->cache->loadParams($rid),
-            $request->query->all(),
-            $request->request->all()
-        );
-        $this->params['config'] = json_decode(
-            base64_decode(
-                $rid,
-                true
-            ),
-            true
-        );
-    }
+    protected abstract function initParams(Request $request);
 }

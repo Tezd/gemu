@@ -6,10 +6,11 @@ use Symfony\Component\HttpFoundation\Request;
 
 $app = new Gemu\Core\Application();
 
-$app->match('/{gateway}/{endPoint}', function (Request $request, $gateway) use ($app)
+/** @todo make that purpose be handled by gateway? */
+$app->match('{purpose}/{gateway}/{endPoint}', function (Request $request, $purpose, $gateway) use ($app)
 {
-    return $app['gemu.factory']->getGateway($gateway)->handle($request);
-});
+    return $app['gemu.factory']->getGateway($gateway)->$purpose($request);
+})->assert('purpose', 'emulate|service');
 
 $app->get('/', 'gemu.controller:homepage')->bind('homepage');
 

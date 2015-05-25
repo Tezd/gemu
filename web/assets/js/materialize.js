@@ -1401,7 +1401,6 @@ $(document).ready(function(){
             if (e.button === 2) {
                 return false;
             }
-
             var el = element || this;
 
             // Create ripple
@@ -1410,16 +1409,23 @@ $(document).ready(function(){
             el.appendChild(ripple);
 
             // Get click coordinate and element witdh
-            var pos         = offset(el);
-            var relativeY   = (e.pageY - pos.top);
-            var relativeX   = (e.pageX - pos.left);
-            var scale       = 'scale('+((el.clientWidth / 100) * 10)+')';
-
+            var pos       = offset(el);
+            var relativeY = 0;
+            var relativeX = 0;
             // Support for touch devices
-            if ('touches' in e) {
-              relativeY   = (e.touches[0].pageY - pos.top);
-              relativeX   = (e.touches[0].pageX - pos.left);
+            if('touches' in e && e.touches.length) {
+                relativeY   = (e.touches[0].pageY - pos.top);
+                relativeX   = (e.touches[0].pageX - pos.left);
             }
+            //Normal case
+            else {
+                relativeY   = (e.pageY - pos.top);
+                relativeX   = (e.pageX - pos.left);
+            }
+            // Support for synthetic events
+            relativeX = relativeX >= 0 ? relativeX : 0;
+            relativeY = relativeY >= 0 ? relativeY : 0;
+            var scale       = 'scale('+((el.clientWidth / 100) * 10)+')';
 
             // Attach data to element
             ripple.setAttribute('data-hold', Date.now());
