@@ -28,7 +28,7 @@ final class Application extends Base
     private function additionalRegistration()
     {
         $this->register(new TwigServiceProvider(), array(
-            'twig.path' => __DIR__.'/../Resources/views',
+            'twig.path' => __DIR__.'/../../../app/views',
         ));
 
         $this->register(new ServiceControllerServiceProvider());

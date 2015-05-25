@@ -1,42 +1,45 @@
 <?php
 
-namespace Gemu\Gateway;
+namespace Gemu\Gateway\Ipx;
 
-use Gemu\Core\Gateway;
+use Gemu\Core\Gateway\Response\Emulator as BaseEmulator;
+use Symfony\Component\HttpFoundation\Request;
 
-/**
- * Class NetM
- * @package Gemu\Gateway
- */
-class NetM extends Gateway
+class Emulator extends BaseEmulator
 {
     /**
-     * @return mixed
-     * @throws \Gemu\Core\Error\BadEndPoint
+     * Get method which we need to invoke inside emulator based on request
+     * @return string
      */
-    protected function PaymentGateway()
+    protected function getEndPoint(Request $request)
     {
-        return $this->invokeEndpoint($this->request->get('RequestType'));
+        return $request->get('RequestType');
     }
 
-    private function _initParams()
+    /**
+     * Initializes parameters for use inside of other emulator invoked methods
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *
+     * @return void
+     */
+    protected function initParams(Request $request)
     {
-
+        $rid = $request->query->get('RequestID');
+        $this->params = array_merge(
+            $this->cache->loadParams($rid),
+            $request->query->all(),
+            $request->request->all()
+        );
+        $this->params['config'] = json_decode(
+            base64_decode(
+                $rid,
+                true
+            ),
+            true
+        );
     }
 
-    private function CheckTan()
-    {
-
-    }
-
-    private function PrepareInfo()
-    {
-
-    }
-    private function PrepareSubscription()
-    {
-
-    }
     private function QueryInfo()
     {
         $now = date('Y-m-d H:i:s');
@@ -89,4 +92,5 @@ HERE;
 
         return $s;
     }
+
 }

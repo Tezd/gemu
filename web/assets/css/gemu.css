@@ -1,0 +1,73 @@
+.my-side-nav-fixed
+{
+    position: fixed;
+    left: 0;
+    width: 240px;
+    height: calc(100%);
+    margin: 0;
+    overflow-y: auto;
+    padding-bottom: 60px;
+}
+
+
+header, main, footer {
+    padding-left: 240px;
+}
+
+@media only screen and (max-width : 992px) {
+    header, main, footer {
+        padding-left: 0;
+    }
+}
+
+
+.button, .mwdkInput, .mwdkbody {
+    font-size: 1.4em;
+}
+.button, .mwdkInput, .mwdkbody {
+    font-size: 1.2em;
+}
+.button, .mwdkInput, .mwdkbody {
+    font-size: 0.8em;
+}
+
+ul.my-side-nav-fixed div.collapsible-header:hover,
+ul.my-side-nav-fixed div.collapsible-header.active {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+div.flow p{
+    padding: 0 !important;
+    margin-bottom: 10px !important;
+}
+
+div.gemu_select input.valid {
+    border-bottom: 1px solid #4caf50 !important;
+}
+
+div.gemu_select input.invalid {
+    border-bottom: 1px solid #f44336 !important;
+}
+
+.navbar-fixed {
+    position: fixed;
+}
+
+nav .brand-logo {
+    position: fixed;
+}
+
+#main_screen {
+    padding-top: 64px;
+    width: 100%;
+    height:100%;
+    border: 0;
+}
+
+.btn {
+    z-index: 0;
+}
+
+.myhide {
+    display: none;
+}
