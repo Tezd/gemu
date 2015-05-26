@@ -29,6 +29,7 @@ if (isset($_REQUEST['submit'])) {
     if (@$config['flow'] == 'wifi' && $config['operator'] != 4) {
         unset($config['msisdn']);
     }
+    var_dump($config);
 
     $rid = base64_encode(json_encode($config));
 

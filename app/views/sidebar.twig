@@ -7,7 +7,7 @@
         <div class="collapsible-body">
             <div class="row">
                 <div class="input-field col s12">
-                    <select id="gateway" class="gemu_select">
+                    <select id="gateway" class="gemu_select" name="gateway">
                         <option value="" disabled selected>Choose gateway</option>
                         {% for gateway in gateways %}
                             <option value="{{ gateway }}">{{ gateway }}</option>
@@ -16,28 +16,28 @@
                     <label for="gateway">Gateway</label>
                 </div>
                 <div class="input-field col s12 myhide">
-                    <select id="operator" class="gemu_select">
+                    <select id="operator" class="gemu_select" name="operator">
                         <option value="" disabled selected>Choose operator</option>
                     </select>
                     <label for="operator">Operator</label>
                 </div>
                 <div class="input-field col s12">
-                    <input id="campaign-link" type="text">
+                    <input id="campaign-link" name="campaign-link" type="text" data-url-base="true">
                     <label for="campaign-link">Campaign link</label>
                 </div>
                 <div class="input-field col s8">
-                    <input id="msisdn" type="text">
+                    <input id="msisdn" name="msisdn" type="text">
                     <label for="msisdn">MSISDN</label>
                 </div>
                 <div class="input-field col s12 flow">
                     <label class="active" for="flow">Flow</label>
                     <div id="flow">
                         <p>
-                            <input name="flow" type="radio" checked id="wifi"/>
+                            <input name="flow" type="radio" checked id="wifi" value="wifi"/>
                             <label for="wifi">Wifi</label>
                         </p>
                         <p>
-                            <input name="flow" type="radio" id="3g"/>
+                            <input name="flow" type="radio" id="3g" value="3g"/>
                             <label for="3g">3G</label>
                         </p>
                     </div>
