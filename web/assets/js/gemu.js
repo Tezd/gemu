@@ -1,7 +1,7 @@
 $.fn.msisdn_input = function(prefill) {
     $msisdnInput = $(this);
     var generateMsisdn = function(){
-        $msisdnInput.val('0'+parseInt(Math.random()*10000000000));
+        $msisdnInput.val('0049'+parseInt(Math.random()*10000000000));
     };
     if(prefill === true) {
         generateMsisdn();
@@ -44,17 +44,18 @@ $.fn.submit_button = function() {
         );
     }
 
+    function get_real_element($el) {
+        if($el.hasClass('select-dropdown')) {
+            return $el.next().next();
+        }
+        return $el;
+    }
+
     function validate_controls($elem) {
-        var get_validatable_element = function($el) {
-            if($el.hasClass('select-dropdown')) {
-                return $el.next().next();
-            }
-            return $el;
-        };
         var isValid = true;
         var validate = function() {
             var $self = $(this);
-            var val = get_validatable_element($self).val();
+            var val = get_real_element($self).val();
             if(val != null && val.length != 0) {
                 $self.removeClass('invalid').addClass('valid');
                 return;
@@ -66,6 +67,48 @@ $.fn.submit_button = function() {
         return isValid;
     }
 
+    function create_link($elem) {
+        var emulateUrlBuilder = function(baseUri) {
+            var parsedUrl = $('<a>', { href: baseUri })[0];
+            var params = {};
+            var getParams = function()
+            {
+                var _buildParams = $.param({
+                    emulate : 1,
+                    rid : btoa(JSON.stringify(params))
+                });
+                return parsedUrl.search ?
+                    parsedUrl.search +'&'+_buildParams :
+                    '?' + _buildParams;
+            };
+            this.addParam = function (name, val) {
+                params[name] = val;
+            };
+            this.build = function()
+            {
+                return parsedUrl.protocol
+                    + '//'
+                    + parsedUrl.host
+                    + parsedUrl.pathname
+                    + getParams()
+                    + parsedUrl.hash;
+            };
+        };
+
+        var builder = new emulateUrlBuilder(
+            $elem.find('input:text[data-url-base]').val()
+        );
+
+        function stripInfo(){
+            var $self = get_real_element($(this));
+            builder.addParam($self.attr('name'), $self.val());
+        }
+
+        $elem.find('input:text:not([data-url-base])').each(stripInfo);
+        $elem.find('input[type="radio"][name]:checked').each(stripInfo);
+        return builder.build();
+    }
+
     $(this).click(function() {
         $form = $(this).parent().parent().parent();
         $target = $form.parent().next().children(':first-child');
@@ -74,7 +117,7 @@ $.fn.submit_button = function() {
         }
         simulate_wave($target[0]);
         $target.click();
-        $('#main_screen').attr('src','http://172.19.0.2/mcb-ads');
+        $('#main_screen').attr('src', create_link($form));
     });
 };
 
