@@ -7,8 +7,8 @@ use Gemu\Core\Gateway\Response\Emulator;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Class Controller
- * @package Gemu\Core\MVC
+ * Class Generic
+ * @package Gemu\Core\Gateway
  */
 class Generic
 {
@@ -34,7 +34,7 @@ class Generic
     /**
      * @param \Symfony\Component\HttpFoundation\Request $request
      *
-     * @return mixed
+     * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Gemu\Core\Error\BadEndPoint
      */
     public function emulate(Request $request)
@@ -45,40 +45,11 @@ class Generic
     /**
      * @param \Symfony\Component\HttpFoundation\Request $request
      *
-     * @return mixed
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Gemu\Core\Error\BadEndPoint
      */
     public function service(Request $request)
     {
         return $this->service->handle($request);
     }
-
-//    /**
-//     * @param \Symfony\Component\HttpFoundation\Request $request
-//     *
-//     * @return mixed
-//     */
-//    protected function getEndPoint(Request $request)
-//    {
-//        return $request->attributes->get('endPoint');
-//    }
-
-//    /**
-//     * @param \Symfony\Component\HttpFoundation\Request $request
-//     */
-//    protected function initParams(Request $request)
-//    {
-//        $rid = $request->query->get('RequestID');
-//        $this->params = array_merge(
-//            $this->cache->loadParams($rid),
-//            $request->query->all(),
-//            $request->request->all()
-//        );
-//        $this->params['config'] = json_decode(
-//            base64_decode(
-//                $rid,
-//                true
-//            ),
-//            true
-//        );
-//    }
 }

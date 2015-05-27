@@ -3,94 +3,71 @@
 namespace Gemu\Gateway\Ipx;
 
 use Gemu\Core\Gateway\Response\Emulator as BaseEmulator;
-use Symfony\Component\HttpFoundation\Request;
+use Gemu\Gateway\Ipx\Soap\Identification;
+use Gemu\Gateway\Ipx\Soap\OnlineLookup;
+use Gemu\Gateway\Ipx\Soap\Subscription;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class Emulator extends BaseEmulator
 {
-    /**
-     * Get method which we need to invoke inside emulator based on request
-     * @return string
-     */
-    protected function getEndPoint(Request $request)
-    {
-        return $request->get('RequestType');
-    }
 
     /**
      * Initializes parameters for use inside of other emulator invoked methods
      *
-     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param string $transactionKey
      *
-     * @return void
+     * @return array
      */
-    protected function initParams(Request $request)
+    protected function initParams($transactionKey)
     {
-        $rid = $request->query->get('RequestID');
-        $this->params = array_merge(
-            $this->cache->loadParams($rid),
-            $request->query->all(),
-            $request->request->all()
-        );
-        $this->params['config'] = json_decode(
-            base64_decode(
-                $rid,
-                true
-            ),
-            true
-        );
+        return null;
     }
 
-    private function QueryInfo()
+    protected function createSoapServer($scope)
     {
-        $now = date('Y-m-d H:i:s');
-
-        if ($this->params['config']['flow'] == '3g' || $this->params['config']['operator'] == 4) {
-            $msisdn = $this->params['config']['msisdn'];
-        } else {
-            $msisdn = $this->params['Destination'];
-        }
-
-        if (!isset($this->params['Description'])) {
-            $this->params['Description'] = '';
-            $this->params['SubscriptionFee'] = '';
-        }
-
-        $s = <<<HERE
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<Response type="QueryInfo">
-  <StatusCode>0</StatusCode>
-  <StatusText>OK</StatusText>
-  <RequestID>{$this->params['RequestID']}</RequestID>
-  <TransactionID>{$this->params['RequestID']}</TransactionID>
-  <OperatorID>{$this->params['config']['operator']}</OperatorID>
-  <PaymentOperatorID>{$this->params['config']['operator']}</PaymentOperatorID>
-  <Description>{$this->params['Description']}</Description>
-  <Destination>${msisdn}</Destination>
-  <TransactionStatusCode>1</TransactionStatusCode>
-  <TransactionStatusText>Transmitted TAN to MS, waiting for TAN input</TransactionStatusText>
-  <Subscriptions>
-    <Number>1</Number>
-    <Subscription>
-      <SubscriptionID>{$this->params['RequestID']}</SubscriptionID>
-      <SubscriptionStatusCode>1</SubscriptionStatusCode>
-      <SubscriptionStatusText>Subscription ready</SubscriptionStatusText>
-      <ServiceID>web_de_abo</ServiceID>
-      <ServiceType>web</ServiceType>
-      <SubscriptionFee>{$this->params['SubscriptionFee']}</SubscriptionFee>
-      <ItemFee>0</ItemFee>
-      <Currency>EURO-CENT</Currency>
-      <VAT>19.0</VAT>
-      <OperatorID>1</OperatorID>
-      <PaymentOperatorID>1</PaymentOperatorID>
-      <Description>{$this->params['Description']}</Description>
-      <StartTimestamp>${now}</StartTimestamp>
-      <LastPeriodFeeTimestamp>${now}</LastPeriodFeeTimestamp>
-    </Subscription>
-  </Subscriptions>
-</Response>
-HERE;
-
-        return $s;
+        return new \SoapServer(__DIR__.'/../../../../app/wsdl/Ipx/'.$scope);
     }
 
+    protected function OnlineLookup()
+    {
+        $response = new Response();
+        $response->headers->set('Content-Type', 'text/xml; charset=ISO-8859-1');
+        ob_start();
+        $soapServer = $this->createSoapServer('OnlineLookup.wsdl');
+        $soapServer->setObject(new OnlineLookup($this->cache));
+        $soapServer->handle();
+        return $response->setContent(ob_get_clean());
+    }
+
+    protected function Identification()
+    {
+        $response = new Response();
+        $response->headers->set('Content-Type', 'text/xml; charset=ISO-8859-1');
+        ob_start();
+        $soapServer = $this->createSoapServer('Identification.wsdl');
+        $soapServer->setObject(new Identification($this->cache));
+        $soapServer->handle();
+        return $response->setContent(ob_get_clean());
+    }
+
+    protected function Subscription()
+    {
+        $response = new Response();
+        $response->headers->set('Content-Type', 'text/xml; charset=ISO-8859-1');
+        ob_start();
+        $soapServer = $this->createSoapServer('Subscription.wsdl');
+        $soapServer->setObject(new Subscription($this->cache));
+        $soapServer->handle();
+        return $response->setContent(ob_get_clean());
+    }
+
+    protected function redirectUrl()
+    {
+        $rid = $this->request->get('rid');
+        $params  = $this->cache->loadParams($rid);
+        return new RedirectResponse(
+            $params['return_url']
+        );
+    }
 }

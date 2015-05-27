@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://www.ipx.com/api/services/onlinelookupapi10" xmlns:typens="http://www.ipx.com/api/services/onlinelookupapi10/types" targetNamespace="http://www.ipx.com/api/services/onlinelookupapi10">
+    <types>
+        <xsd:schema targetNamespace="http://www.ipx.com/api/services/onlinelookupapi10/types" elementFormDefault="qualified">
+            <xsd:element name="ResolveClientIPRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="correlationId" type="xsd:string"/>
+                        <xsd:element name="clientIPAddress" type="xsd:string"/>
+                        <xsd:element name="campaignName" type="xsd:string"/>
+                        <xsd:element name="username" type="xsd:string"/>
+                        <xsd:element name="password" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="ResolveClientIPResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="correlationId" type="xsd:string"/>
+                        <xsd:element name="lookupId" type="xsd:string"/>
+                        <xsd:element name="operator" type="xsd:string"/>
+                        <xsd:element name="operatorNetworkCode" type="xsd:string"/>
+                        <xsd:element name="country" type="xsd:string"/>
+                        <xsd:element name="countryName" type="xsd:string"/>                        
+                        <xsd:element name="responseCode" type="xsd:int"/>
+                        <xsd:element name="responseMessage" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </types>
+    <message name="resolveClientIPRequest">
+        <part name="request" element="typens:ResolveClientIPRequest"/>
+    </message>
+    <message name="resolveClientIPResponse">
+        <part name="result" element="typens:ResolveClientIPResponse"/>
+    </message>
+    <portType name="OnlineLookupApiPort">
+        <operation name="resolveClientIP">
+            <input message="tns:resolveClientIPRequest"/>
+            <output message="tns:resolveClientIPResponse"/>
+        </operation>
+    </portType>
+    <binding name="OnlineLookupApiBinding" type="tns:OnlineLookupApiPort">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="resolveClientIP">
+            <soap:operation soapAction="tns:resolveClientIP"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+    </binding>
+    <service name="OnlineLookupApiService">
+        <port name="OnlineLookupApi10" binding="tns:OnlineLookupApiBinding">
+            <soap:address location="http://172.19.0.2/gemu/emulate/Ipx/OnlineLookup"/>
+        </port>
+    </service>
+</definitions>

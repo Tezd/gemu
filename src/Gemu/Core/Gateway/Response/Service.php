@@ -5,20 +5,20 @@ namespace Gemu\Core\Gateway\Response;
 use Gemu\Core\Error\BadEndPoint;
 use Symfony\Component\HttpFoundation\Request;
 
-abstract class Service
+/**
+ * Class Service
+ * @package Gemu\Core\Gateway\Response
+ */
+abstract class Service extends EndPoint
 {
     /**
      * @param \Symfony\Component\HttpFoundation\Request $request
      *
-     * @return mixed
+     * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Gemu\Core\Error\BadEndPoint
      */
     public function handle(Request $request)
     {
-        $endPoint = $request->attributes->get('endPoint');
-        if(!method_exists($this, $endPoint)) {
-            throw new BadEndPoint(get_called_class(), $endPoint);
-        }
-        return $this->$endPoint();
+        return $this->prepare($request)->invokeEndPoint();
     }
 }

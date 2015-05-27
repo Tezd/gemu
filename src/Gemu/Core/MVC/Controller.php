@@ -35,6 +35,14 @@ class Controller
     }
 
     /**
+     * @return string
+     */
+    public function optIn()
+    {
+        return $this->twig->render('optin.twig');
+    }
+
+    /**
      * @return array
      */
     protected function getGateways()
