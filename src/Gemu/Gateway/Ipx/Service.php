@@ -10,10 +10,8 @@ class Service extends \Gemu\Core\Gateway\Response\Service
     {
         return new JsonResponse(
             array(
-                1 => 'Derp',
-                2 => 'Vodafone',
-                3 => 'E-Plus',
-                4 => 'O2'
+                'AIRTEL' => 'Vodafone',
+                'WHATEVER' => 'Yoigo',
             )
         );
     }

@@ -14,6 +14,8 @@ $app->match('{purpose}/{gateway}/{endPoint}', function (Request $request, $purpo
 
 $app->get('/', 'gemu.controller:homepage')->bind('homepage');
 
+$app->get('remote/optin', 'gemu.controller:optin')->bind('optin');
+
 //
 //$app->match('/transport/PaymentGateway', function (Request $request) {
 //    $requestType = $request->get('RequestType');

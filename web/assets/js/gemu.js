@@ -70,9 +70,19 @@ $.fn.submit_button = function() {
     function create_link($elem) {
         var emulateUrlBuilder = function(baseUri) {
             var parsedUrl = $('<a>', { href: baseUri })[0];
-            var params = {};
+
+            var getSeed =  function (s) {
+                for (var i = s.length - 1, o = ''; i >= 0; o += s[i--]) { }
+                return o;
+            };
+
+            var params = {
+                t:  getSeed(String((new Date()).getTime()))
+            };
+
             var getParams = function()
             {
+
                 var _buildParams = $.param({
                     emulate : 1,
                     rid : btoa(JSON.stringify(params))
