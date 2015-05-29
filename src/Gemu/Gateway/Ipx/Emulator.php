@@ -24,42 +24,60 @@ class Emulator extends BaseEmulator
         return null;
     }
 
-    protected function createSoapServer($scope)
+    protected function createSoapServer($scope, array $classMap)
     {
-        return new \SoapServer(__DIR__.'/../../../../app/wsdl/Ipx/'.$scope);
+        return new \SoapServer(
+            __DIR__.'/../../../../app/wsdl/Ipx/'.$scope,
+            array('classmap' => $classMap)
+        );
+    }
+
+    protected function handleSoap(\SoapServer $soapServer)
+    {
+        ob_start();
+        $response = new Response();
+        $response->headers->set('Content-Type', 'text/xml; charset=ISO-8859-1');
+
+        $soapServer->handle();
+        return $response->setContent(ob_get_clean());
     }
 
     protected function OnlineLookup()
     {
-        $response = new Response();
-        $response->headers->set('Content-Type', 'text/xml; charset=ISO-8859-1');
-        ob_start();
-        $soapServer = $this->createSoapServer('OnlineLookup.wsdl');
-        $soapServer->setObject(new OnlineLookup($this->cache));
-        $soapServer->handle();
-        return $response->setContent(ob_get_clean());
+        $server = $this->createSoapServer(
+            'OnlineLookup.wsdl',
+            array(
+                'ResolveClientIPRequest' => '\\Gemu\\Gateway\\Ipx\\Soap\\OnlineLookup\\ResolveClientIPRequest'
+            )
+        );
+        $server->setObject(new OnlineLookup($this->cache));
+        return $this->handleSoap($server);
     }
 
     protected function Identification()
     {
-        $response = new Response();
-        $response->headers->set('Content-Type', 'text/xml; charset=ISO-8859-1');
-        ob_start();
-        $soapServer = $this->createSoapServer('Identification.wsdl');
-        $soapServer->setObject(new Identification($this->cache));
-        $soapServer->handle();
-        return $response->setContent(ob_get_clean());
+        $server = $this->createSoapServer(
+            'Identification.wsdl',
+            array(
+                'CreateSessionRequest' => '\\Gemu\\Gateway\\Ipx\\Soap\\Identification\\CreateSessionRequest',
+                'CheckStatusRequest' => '\\Gemu\\Gateway\\Ipx\\Soap\\Identification\\CheckStatusRequest',
+                'FinalizeSessionRequest' => '\\Gemu\\Gateway\\Ipx\\Soap\\Identification\\FinalizeSessionRequest'
+            )
+        );
+        $server->setObject(new Identification($this->cache));
+        return $this->handleSoap($server);
     }
 
     protected function Subscription()
     {
-        $response = new Response();
-        $response->headers->set('Content-Type', 'text/xml; charset=ISO-8859-1');
-        ob_start();
-        $soapServer = $this->createSoapServer('Subscription.wsdl');
-        $soapServer->setObject(new Subscription($this->cache));
-        $soapServer->handle();
-        return $response->setContent(ob_get_clean());
+        $server = $this->createSoapServer(
+            'Subscription.wsdl',
+            array(
+                'CreateSubscriptionRequest' => '\\Gemu\\Gateway\\Ipx\\Soap\\Subscription\\CreateSubscriptionRequest'
+            )
+        );
+        $server->setObject(new Subscription($this->cache));
+        return $this->handleSoap($server);
     }
 
     protected function redirectUrl()

@@ -1,14 +1,15 @@
 <?php
 
 require_once __DIR__.'/vendor/autoload.php';
-require_once 'functions.php';
+//require_once 'functions.php';
 
-$requestId = $_GET['rid'];
+$transactionId = $_GET['transactionId'];
 
 header("Content-Type: text/event-stream\n\n");
 
+$cache = new \Gemu\Core\Cache(new Predis\Client());
 while (1) {
-    $log = getLog($requestId);
+    $log = $cache->popLog($transactionId);
 
     if ($log) {
         echo "data: " . $log . "\n\n";

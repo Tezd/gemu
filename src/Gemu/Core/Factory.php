@@ -15,7 +15,6 @@ use Predis\Client;
 class Factory
 {
     const GATEWAY_NAMESPACE_PREFIX = '\\Gemu\\Gateway\\';
-//    const GATEWAY_PART_REQUEST_PARSER = '\\Request\\Parser';
     const GATEWAY_PART_RESPONSE_EMULATOR = '\\Emulator';
     const GATEWAY_PART_RESPONSE_SERVICE = '\\Service';
 
