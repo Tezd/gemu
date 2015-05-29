@@ -15,7 +15,7 @@ class Subscription
     }
     public function createSubscription(CreateSubscriptionRequest $request)
     {
-
+        $this->cache->pushLog($request->correlationId, 'CreateSubscription');
         $params = $this->cache->loadParams($request->correlationId);
         return array(
             'correlationId' => $request->correlationId,

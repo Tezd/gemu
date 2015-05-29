@@ -67,25 +67,44 @@ $.fn.submit_button = function() {
         return isValid;
     }
 
+    /**
+     * Refactor this. Place log stream and get transaction functions outside of emulateUrlBuilder or rename it.
+     * @param $elem
+     * @returns {*}
+     */
     function create_link($elem) {
         var emulateUrlBuilder = function(baseUri) {
             var parsedUrl = $('<a>', { href: baseUri })[0];
+            var params = {};
 
-            var getSeed =  function (s) {
-                for (var i = s.length - 1, o = ''; i >= 0; o += s[i--]) { }
-                return o;
+            var getTransactionId = function() {
+                return $.ajax(
+                    {
+                        method: 'POST',
+                        async: false,
+                        url: 'save/transaction',
+                        dataType: 'json',
+                        data: params
+                    }
+                ).responseJSON.id;
             };
 
-            var params = {
-                t:  getSeed(String((new Date()).getTime()))
+            var logStream = function(transactionID, $log) {
+                var src = new EventSource("logs.php?transactionId="+transactionID);
+                src.onmessage = function(e) {
+                    $log.append('<p>'+ e.data + '</p>');
+                };
             };
 
             var getParams = function()
             {
-
+                var transactionId = getTransactionId();
+                var $log = $('#logs');
+                $log.children().remove();
+                logStream(transactionId, $log);
                 var _buildParams = $.param({
                     emulate : 1,
-                    rid : btoa(JSON.stringify(params))
+                    rid : transactionId
                 });
                 return parsedUrl.search ?
                     parsedUrl.search +'&'+_buildParams :

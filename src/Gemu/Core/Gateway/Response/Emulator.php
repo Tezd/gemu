@@ -45,15 +45,6 @@ abstract class Emulator extends EndPoint
      */
     public function emulate(Request $request)
     {
-//        $endPoint = $this->getEndPoint($request);
-//        $this->initParams($request);
-//        $this->cache->pushLog(
-//            $this->params['rid'],
-//            sprintf(
-//                '%s endpoint invoked',
-//                $endPoint
-//            )
-//        );
         return $this->prepare($request)->invokeEndPoint();
     }
     /**
@@ -77,7 +68,7 @@ abstract class Emulator extends EndPoint
     protected function getParams($transactionKey)
     {
         $params = $this->initParams($transactionKey);
-        $this->cache->saveParams($transactionKey, $params);
+        $this->cache->updateParams($transactionKey, $params);
         return $params;
     }
 

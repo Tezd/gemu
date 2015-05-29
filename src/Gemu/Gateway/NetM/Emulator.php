@@ -45,13 +45,6 @@ class Emulator extends BaseEmulator
             $this->request->query->all(),
             $this->request->request->all()
         );
-        $params['config'] = json_decode(
-            base64_decode(
-                $transactionKey,
-                true
-            ),
-            true
-        );
         return $params;
     }
 

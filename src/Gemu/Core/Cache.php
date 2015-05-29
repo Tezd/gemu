@@ -11,8 +11,9 @@ class Cache
      */
     protected $redis;
 
-    const LOG_PREFIX = 'emulator:log:';
-    const PARAMS_PREFIX = 'emulator:params:';
+    const LOG_PREFIX = 'emulator:log';
+    const PARAMS_PREFIX = 'emulator:params';
+    const EXPIRE = 3600;
 
     /**
      * @param \Predis\Client $redis
@@ -23,17 +24,17 @@ class Cache
     }
 
     /**
-     * @param string $key
+     * @param $id
      * @param string $data
      *
-     * @return int
+     * @return string
      */
-    public function pushLog($key, $data)
+    public function pushLog($id, $data)
     {
-        return $this->redis->rpush(
-            $this->getKey(self::LOG_PREFIX, $key),
-            $data
-        );
+        $key = $this->getKey(self::LOG_PREFIX, $id);
+        $this->redis->rpush($key, $data);
+        $this->redis->expire($key, self::EXPIRE);
+        return $id;
     }
 
     /**
@@ -53,20 +54,27 @@ class Cache
     }
 
     /**
-     * @param string $key
      * @param array $value
      *
-     * @return mixed
+     * @return string
      */
-    public function saveParams($key, array $value)
+    public function saveParams(array $value)
     {
-        return $this->redis->set(
-            $this->getKey(
-                self::PARAMS_PREFIX,
-                $key
-            ),
-            json_encode($value)
-        );
+        return $this->updateParams(md5(uniqid(mt_rand(), true)), $value);
+    }
+
+    /**
+     * @param string $id
+     * @param array $value
+     *
+     * @return string
+     */
+    public function updateParams($id, array $value)
+    {
+        $key = $this->getKey(self::PARAMS_PREFIX, $id);
+        $this->redis->set($key, json_encode($value));
+        $this->redis->expire($key, self::EXPIRE);
+        return $id;
     }
 
     /**
@@ -76,12 +84,13 @@ class Cache
      */
     public function loadParams($key)
     {
-        return (array)json_decode(
+        return json_decode(
             $this->redis->get(
                 $this->getKey(
                     self::PARAMS_PREFIX, $key
                 )
-            )
+            ),
+            true
         );
     }
 

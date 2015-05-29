@@ -2,9 +2,9 @@
 
 namespace Gemu\Gateway\Ipx\Soap;
 
+use Gemu\Core\Cache;
 use Gemu\Gateway\Ipx\Soap\Identification\CheckStatusRequest;
 use Gemu\Gateway\Ipx\Soap\Identification\CreateSessionRequest;
-use Gemu\Core\Cache;
 use Gemu\Gateway\Ipx\Soap\Identification\FinalizeSessionRequest;
 
 class Identification
@@ -21,11 +21,12 @@ class Identification
     {
         $params = $this->cache->loadParams($request->correlationId);
         $params['return_url'] = $request->returnURL;
-        $this->cache->saveParams($request->correlationId, $params);
+        $this->cache->updateParams($request->correlationId, $params);
+        $this->cache->pushLog($request->correlationId, 'CreateSession');
         return array(
             'correlationId' => $request->correlationId,
-            'sessionId' => uniqid(),
-            'redirectURL' => 'http://172.19.0.2/gemu/emulate/Ipx/returnUrl?rid='.$request->correlationId,
+            'sessionId' => $request->returnURL,
+            'redirectURL' => 'http://172.19.0.2/gemu/emulate/Ipx/redirectUrl?rid='.$request->correlationId,
             'responseCode' => 0,
             'responseMessage' => '',
         );
@@ -33,6 +34,7 @@ class Identification
 
     public function checkStatus(CheckStatusRequest $request)
     {
+        $this->cache->pushLog($request->correlationId, 'CheckStatus');
         return array(
             'correlationId' => $request->correlationId,
             'statusCode' => 1,
@@ -45,6 +47,7 @@ class Identification
 
     public function finalizeSession(FinalizeSessionRequest $request)
     {
+        $this->cache->pushLog($request->correlationId, 'finalizeSession');
         $params = $this->cache->loadParams($request->correlationId);
         return array(
             'correlationId' => $request->correlationId,
