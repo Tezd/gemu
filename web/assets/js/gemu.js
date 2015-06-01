@@ -1,51 +1,131 @@
-$.fn.msisdn_input = function(prefill) {
-    $msisdnInput = $(this);
-    var generateMsisdn = function(){
-        $msisdnInput.val('0049'+parseInt(Math.random()*10000000000));
+/**
+ * Class that listens for server side events from EventSource
+ * and outputs them into log element in the window
+ *
+ * @param $log
+ */
+var streamListener = function ($log) {
+    var source;
+    var $_log = $log;
+    this.listen = function (transactionId) {
+        if (source instanceof EventSource) {
+            source.close();
+        }
+        $_log.children().remove();
+        source = new EventSource("logs.php?transactionId=" + transactionId);
+        source.onmessage = function (e) {
+            $_log.append('<p>' + e.data + '</p>');
+        };
     };
-    if(prefill === true) {
+};
+
+/**
+ * Saves transaction data, emulate url, attaches event listener
+ * @param baseUri
+ */
+var emulate = function (baseUri) {
+    var parsedUrl = $('<a>', {
+        href: baseUri
+    })[0];
+    var params = {};
+    var transactionId;
+    var url;
+
+    var composeParams = function () {
+        var _buildParams = $.param({
+            emulate: 1,
+            rid: transactionId
+        });
+        return parsedUrl.search ? parsedUrl.search + '&' + _buildParams :
+        '?' + _buildParams;
+    };
+
+    var createLink = function () {
+        url = parsedUrl.protocol + '//' + parsedUrl.host + parsedUrl.pathname + composeParams() + parsedUrl.hash;
+    };
+
+    var saveTransaction = function () {
+        transactionId = $.ajax({
+            method: 'POST',
+            async: false,
+            url: 'save/transaction',
+            dataType: 'json',
+            data: params
+        }).responseJSON.id;
+    };
+
+    this.addParam = function (name, val) {
+        params[name] = val;
+    };
+
+    this.build = function () {
+        saveTransaction();
+        createLink();
+        return this;
+    };
+
+    this.attach = function (listener) {
+        listener.listen(transactionId);
+        return this;
+    };
+
+    this.url = function () {
+        return url;
+    };
+};
+
+/**
+ * Creates input with msisdn and button that can repopulate this input.
+ * @param prefill indicates wheter we want to populate input or leave it empty
+ */
+$.fn.msisdn_input = function (prefill) {
+    $msisdnInput = $(this);
+    var generateMsisdn = function () {
+        $msisdnInput.val('0049' + parseInt(Math.random() * 10000000000));
+    };
+    if (prefill === true) {
         generateMsisdn();
     }
     $(this).parent().after($('<div class="input-field col s4"></div>')
+        .append(
+        $('<a class="btn-floating btn waves-effect waves-light"></a>')
+            .click(generateMsisdn)
             .append(
-            $('<a class="btn-floating btn waves-effect waves-light"></a>')
-                .click(generateMsisdn)
-                .append(
-                $('<i class="mdi-action-autorenew"></i>')
-
-            )
+            $('<i class="mdi-action-autorenew"></i>')
 
         )
-    );
+
+    ));
 };
 
-$.fn.submit_button = function() {
-    function simulate_wave(elem)
-    {
+/**
+ * Adds a logic to submit button in settings section.
+ * This code validates inputs inside of settings section.
+ * If all elements are valid:
+ * 1) creates emulate link for iframe
+ * 2) open log section
+ * 3) create ripple effect for log section.
+ */
+$.fn.submit_button = function () {
+    function simulate_wave(elem) {
         elem.dispatchEvent(
             new MouseEvent(
-                'mousedown',
-                {
+                'mousedown', {
                     view: window,
                     bubbles: true,
                     cancelable: true
-                }
-            )
-        );
+                }));
         elem.dispatchEvent(
             new MouseEvent(
-                'mouseup',
-                {
+                'mouseup', {
                     view: window,
                     bubbles: true,
                     cancelable: true
-                }
-            )
-        );
+                }));
     }
 
     function get_real_element($el) {
-        if($el.hasClass('select-dropdown')) {
+        if ($el.hasClass('select-dropdown')) {
             return $el.next().next();
         }
         return $el;
@@ -53,10 +133,10 @@ $.fn.submit_button = function() {
 
     function validate_controls($elem) {
         var isValid = true;
-        var validate = function() {
+        var validate = function () {
             var $self = $(this);
             var val = get_real_element($self).val();
-            if(val != null && val.length != 0) {
+            if (val != null && val.length != 0) {
                 $self.removeClass('invalid').addClass('valid');
                 return;
             }
@@ -68,80 +148,28 @@ $.fn.submit_button = function() {
     }
 
     /**
-     * Refactor this. Place log stream and get transaction functions outside of emulateUrlBuilder or rename it.
      * @param $elem
      * @returns {*}
      */
     function create_link($elem) {
-        var emulateUrlBuilder = function(baseUri) {
-            var parsedUrl = $('<a>', { href: baseUri })[0];
-            var params = {};
 
-            var getTransactionId = function() {
-                return $.ajax(
-                    {
-                        method: 'POST',
-                        async: false,
-                        url: 'save/transaction',
-                        dataType: 'json',
-                        data: params
-                    }
-                ).responseJSON.id;
-            };
+        var emulator = new emulate(
+            $elem.find('input:text[data-url-base]').val());
 
-            var logStream = function(transactionID, $log) {
-                var src = new EventSource("logs.php?transactionId="+transactionID);
-                src.onmessage = function(e) {
-                    $log.append('<p>'+ e.data + '</p>');
-                };
-            };
-
-            var getParams = function()
-            {
-                var transactionId = getTransactionId();
-                var $log = $('#logs');
-                $log.children().remove();
-                logStream(transactionId, $log);
-                var _buildParams = $.param({
-                    emulate : 1,
-                    rid : transactionId
-                });
-                return parsedUrl.search ?
-                    parsedUrl.search +'&'+_buildParams :
-                    '?' + _buildParams;
-            };
-            this.addParam = function (name, val) {
-                params[name] = val;
-            };
-            this.build = function()
-            {
-                return parsedUrl.protocol
-                    + '//'
-                    + parsedUrl.host
-                    + parsedUrl.pathname
-                    + getParams()
-                    + parsedUrl.hash;
-            };
-        };
-
-        var builder = new emulateUrlBuilder(
-            $elem.find('input:text[data-url-base]').val()
-        );
-
-        function stripInfo(){
+        function stripInfo() {
             var $self = get_real_element($(this));
-            builder.addParam($self.attr('name'), $self.val());
+            emulator.addParam($self.attr('name'), $self.val());
         }
 
         $elem.find('input:text:not([data-url-base])').each(stripInfo);
         $elem.find('input[type="radio"][name]:checked').each(stripInfo);
-        return builder.build();
+        return emulator.build().attach(new streamListener($('#logs'))).url();
     }
 
-    $(this).click(function() {
+    $(this).click(function () {
         $form = $(this).parent().parent().parent();
         $target = $form.parent().next().children(':first-child');
-        if(!validate_controls($form)){
+        if (!validate_controls($form)) {
             return false;
         }
         simulate_wave($target[0]);
@@ -150,20 +178,26 @@ $.fn.submit_button = function() {
     });
 };
 
-$.fn.create_gateway_select = function($operator){
+/**
+ * @todo add caching
+ * @todo add f5 refill of operator select
+ * Adds slide effect and ajax fill for operator select based on gateway select
+ * @param $operator
+ */
+$.fn.create_gateway_select = function ($operator) {
     var $self = $(this);
     $operator.material_select();
-    var operator_select = function() {
+    var operator_select = function () {
         $operator.parent().parent().slideUp(800);
         $.ajax({
             method: 'POST',
-            url: 'service/'+$('#gateway').val()+'/operators',
+            url: 'service/' + $('#gateway').val() + '/operators',
             dataType: 'json'
-        }).done(function(msg) {
+        }).done(function (msg) {
             $operator.children('[value!=""]').remove();
             $operator.val("");
-            for(value in msg) {
-                $operator.append('<option value="'+value+'">'+msg[value]+'</option>');
+            for (value in msg) {
+                $operator.append('<option value="' + value + '">' + msg[value] + '</option>');
             }
             $operator.material_select();
             $operator.parent().parent().slideDown(800);
@@ -172,7 +206,7 @@ $.fn.create_gateway_select = function($operator){
     $self.material_select(operator_select);
 };
 
-$(document).ready(function() {
+$(document).ready(function () {
     $('#msisdn').msisdn_input(true);
     $('#submit').submit_button();
     $('#gateway').create_gateway_select($('#operator'));
