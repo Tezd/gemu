@@ -4,15 +4,15 @@
  *
  * @param $log
  */
-var streamListener = function ($log) {
+var streamListener = function($log) {
     var source;
-    this.listen = function (transactionId) {
+    this.listen = function(transactionId) {
         if (source instanceof EventSource) {
             source.close();
         }
         $log.children().remove();
         source = new EventSource("logs.php?transactionId=" + transactionId);
-        source.onmessage = function (e) {
+        source.onmessage = function(e) {
             $log.append('<p>' + e.data + '</p>');
         };
     };
@@ -22,7 +22,7 @@ var streamListener = function ($log) {
  * Saves transaction data, emulate url, attaches event listener
  * @param baseUri
  */
-var emulate = function (baseUri) {
+var emulate = function(baseUri) {
     var parsedUrl = $('<a>', {
         href: baseUri
     })[0];
@@ -30,20 +30,20 @@ var emulate = function (baseUri) {
     var transactionId;
     var url;
 
-    var composeParams = function () {
+    var composeParams = function() {
         var _buildParams = $.param({
             emulate: 1,
             rid: transactionId
         });
         return parsedUrl.search ? parsedUrl.search + '&' + _buildParams :
-        '?' + _buildParams;
+            '?' + _buildParams;
     };
 
-    var createLink = function () {
+    var createLink = function() {
         url = parsedUrl.protocol + '//' + parsedUrl.host + parsedUrl.pathname + composeParams() + parsedUrl.hash;
     };
 
-    var saveTransaction = function () {
+    var saveTransaction = function() {
         transactionId = $.ajax({
             method: 'POST',
             async: false,
@@ -53,22 +53,22 @@ var emulate = function (baseUri) {
         }).responseJSON.id;
     };
 
-    this.addParam = function (name, val) {
+    this.addParam = function(name, val) {
         params[name] = val;
     };
 
-    this.build = function () {
+    this.build = function() {
         saveTransaction();
         createLink();
         return this;
     };
 
-    this.attach = function (listener) {
+    this.attach = function(listener) {
         listener.listen(transactionId);
         return this;
     };
 
-    this.url = function () {
+    this.url = function() {
         return url;
     };
 };
@@ -77,9 +77,9 @@ var emulate = function (baseUri) {
  * Creates input with msisdn and button that can repopulate this input.
  * @param prefill indicates wheter we want to populate input or leave it empty
  */
-$.fn.msisdn_input = function (prefill) {
+$.fn.msisdn_input = function(prefill) {
     $msisdnInput = $(this);
-    var generateMsisdn = function () {
+    var generateMsisdn = function() {
         $msisdnInput.val('0049' + parseInt(Math.random() * 10000000000));
     };
     if (prefill === true) {
@@ -87,14 +87,13 @@ $.fn.msisdn_input = function (prefill) {
     }
     $(this).parent().after($('<div class="input-field col s4"></div>')
         .append(
-        $('<a class="btn-floating btn waves-effect waves-light"></a>')
+            $('<a class="btn-floating btn waves-effect waves-light"></a>')
             .click(generateMsisdn)
             .append(
-            $('<i class="mdi-action-autorenew"></i>')
+                $('<i class="mdi-action-autorenew"></i>')
 
-        )
-
-    ));
+            )
+        ));
 };
 
 /**
@@ -105,7 +104,7 @@ $.fn.msisdn_input = function (prefill) {
  * 2) open log section
  * 3) create ripple effect for log section.
  */
-$.fn.submit_button = function () {
+$.fn.submit_button = function() {
     function simulate_wave(elem) {
         elem.dispatchEvent(
             new MouseEvent(
@@ -132,7 +131,7 @@ $.fn.submit_button = function () {
 
     function validate_controls($elem) {
         var isValid = true;
-        var validate = function () {
+        var validate = function() {
             var $self = $(this);
             var val = get_real_element($self).val();
             if (val !== null && val.length !== 0) {
@@ -165,7 +164,7 @@ $.fn.submit_button = function () {
         return emulator.build().attach(new streamListener($('#logs'))).url();
     }
 
-    $(this).click(function () {
+    $(this).click(function() {
         $form = $(this).parent().parent().parent();
         $target = $form.parent().next().children(':first-child');
         if (!validate_controls($form)) {
@@ -178,34 +177,55 @@ $.fn.submit_button = function () {
 };
 
 /**
- * @todo add caching
- * @todo add f5 refill of operator select
  * Adds slide effect and ajax fill for operator select based on gateway select
  * @param $operator
  */
-$.fn.create_gateway_select = function ($operator) {
+$.fn.create_gateway_select = function($operator) {
+
     var $self = $(this);
     $operator.material_select();
-    var operator_select = function () {
-        $operator.parent().parent().slideUp(800);
-        $.ajax({
-            method: 'POST',
-            url: 'service/' + $('#gateway').val() + '/operators',
-            dataType: 'json'
-        }).done(function (msg) {
+    var cache = {};
+
+    var operator_select = function() {
+
+        var gateway = $self.val();
+
+        var fill = function(data) {
             $operator.children('[value!=""]').remove();
             $operator.val("");
-            for (var value in msg) {
-                $operator.append('<option value="' + value + '">' + msg[value] + '</option>');
+            for (var value in data) {
+                $operator.append('<option value="' + value + '">' + data[value] + '</option>');
             }
             $operator.material_select();
             $operator.parent().parent().slideDown(800);
-        });
+        };
+
+        var ajaxFill = function(data) {
+            cache[gateway] = data;
+            fill(data);
+        };
+
+        $operator.parent().parent().slideUp(800);
+
+        if (gateway in cache) {
+            fill(cache[gateway]);
+        } else {
+            $.ajax({
+                method: 'POST',
+                url: 'service/' + gateway + '/operators',
+                dataType: 'json'
+            }).done(ajaxFill);
+        }
     };
+
+    if ($self.val()) {
+        operator_select();
+    }
+
     $self.material_select(operator_select);
 };
 
-$(document).ready(function () {
+$(document).ready(function() {
     $('#msisdn').msisdn_input(true);
     $('#submit').submit_button();
     $('#gateway').create_gateway_select($('#operator'));
