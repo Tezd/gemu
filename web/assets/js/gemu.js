@@ -135,7 +135,7 @@ $.fn.submit_button = function () {
         var validate = function () {
             var $self = $(this);
             var val = get_real_element($self).val();
-            if (val != null && val.length != 0) {
+            if (val !== null && val.length !== 0) {
                 $self.removeClass('invalid').addClass('valid');
                 return;
             }
@@ -195,7 +195,7 @@ $.fn.create_gateway_select = function ($operator) {
         }).done(function (msg) {
             $operator.children('[value!=""]').remove();
             $operator.val("");
-            for (value in msg) {
+            for (var value in msg) {
                 $operator.append('<option value="' + value + '">' + msg[value] + '</option>');
             }
             $operator.material_select();
