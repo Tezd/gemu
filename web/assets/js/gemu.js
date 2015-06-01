@@ -6,15 +6,14 @@
  */
 var streamListener = function ($log) {
     var source;
-    var $_log = $log;
     this.listen = function (transactionId) {
         if (source instanceof EventSource) {
             source.close();
         }
-        $_log.children().remove();
+        $log.children().remove();
         source = new EventSource("logs.php?transactionId=" + transactionId);
         source.onmessage = function (e) {
-            $_log.append('<p>' + e.data + '</p>');
+            $log.append('<p>' + e.data + '</p>');
         };
     };
 };
