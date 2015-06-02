@@ -7,16 +7,31 @@ use Gemu\Gateway\Ipx\Soap\Identification\CheckStatusRequest;
 use Gemu\Gateway\Ipx\Soap\Identification\CreateSessionRequest;
 use Gemu\Gateway\Ipx\Soap\Identification\FinalizeSessionRequest;
 
+/**
+ * Class Identification
+ * @package Gemu\Gateway\Ipx\Soap
+ */
 class Identification
 {
 
+    /**
+     * @type \Gemu\Core\Cache
+     */
     protected $cache;
 
+    /**
+     * @param \Gemu\Core\Cache $cache
+     */
     public function __construct(Cache $cache)
     {
         $this->cache = $cache;
     }
 
+    /**
+     * @param \Gemu\Gateway\Ipx\Soap\Identification\CreateSessionRequest $request
+     *
+     * @return array
+     */
     public function createSession(CreateSessionRequest $request)
     {
         $params = $this->cache->loadParams($request->correlationId);
@@ -32,6 +47,11 @@ class Identification
         );
     }
 
+    /**
+     * @param \Gemu\Gateway\Ipx\Soap\Identification\CheckStatusRequest $request
+     *
+     * @return array
+     */
     public function checkStatus(CheckStatusRequest $request)
     {
         $this->cache->pushLog($request->correlationId, 'CheckStatus');
@@ -45,6 +65,11 @@ class Identification
         );
     }
 
+    /**
+     * @param \Gemu\Gateway\Ipx\Soap\Identification\FinalizeSessionRequest $request
+     *
+     * @return array
+     */
     public function finalizeSession(FinalizeSessionRequest $request)
     {
         $this->cache->pushLog($request->correlationId, 'finalizeSession');

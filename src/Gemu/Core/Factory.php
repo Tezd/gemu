@@ -40,9 +40,9 @@ class Factory
     protected function getGatewayParts($gatewayName)
     {
         return @array_map(
-            function($part) use ($gatewayName) {
+            function ($part) use ($gatewayName) {
                 $partClass = Factory::GATEWAY_NAMESPACE_PREFIX.$gatewayName.$part;
-                if(!class_exists($partClass)) {
+                if (!class_exists($partClass)) {
                     throw new NonExistingGatewayPart($partClass);
                 }
                 return $partClass;

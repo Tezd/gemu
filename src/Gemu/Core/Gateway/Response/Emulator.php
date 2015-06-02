@@ -47,29 +47,4 @@ abstract class Emulator extends EndPoint
     {
         return $this->prepare($request)->invokeEndPoint();
     }
-    /**
-     * @todo remove it from here
-     */
-
-    /**
-     * Initializes parameters for use inside of other emulator invoked methods
-     *
-     * @param string $transactionKey
-     * @return array
-     */
-    protected abstract function initParams($transactionKey);
-
-    /**
-     * Calls initialize and persist params inside of cache for later use
-     * @param $transactionKey
-     *
-     * @return array
-     */
-    protected function getParams($transactionKey)
-    {
-        $params = $this->initParams($transactionKey);
-        $this->cache->updateParams($transactionKey, $params);
-        return $params;
-    }
-
 }

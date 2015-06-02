@@ -37,7 +37,7 @@ final class Application extends Base
     private function additionalSharing()
     {
         $twig = $this['twig'];
-        $this['gemu.controller'] = $this->share(function() use ($twig) {
+        $this['gemu.controller'] = $this->share(function () use ($twig) {
             return new Controller($twig);
         });
         $this['gemu.factory'] = $this->share(function () {

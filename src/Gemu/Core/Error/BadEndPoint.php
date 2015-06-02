@@ -3,7 +3,7 @@
 namespace Gemu\Core\Error;
 
 /**
- * @todo make them be like real errors
+ * @todo make them be like real errors. to have previous error
  * Class BadEndPoint
  * @package Gemu\Core\Error
  */

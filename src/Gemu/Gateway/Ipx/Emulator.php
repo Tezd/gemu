@@ -9,21 +9,19 @@ use Gemu\Gateway\Ipx\Soap\Subscription;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Class Emulator
+ * @package Gemu\Gateway\Ipx
+ */
 class Emulator extends BaseEmulator
 {
 
     /**
-     * Initializes parameters for use inside of other emulator invoked methods
+     * @param string $scope
+     * @param array $classMap
      *
-     * @param string $transactionKey
-     *
-     * @return array
+     * @return \SoapServer
      */
-    protected function initParams($transactionKey)
-    {
-        return null;
-    }
-
     protected function createSoapServer($scope, array $classMap)
     {
         return new \SoapServer(
@@ -32,6 +30,11 @@ class Emulator extends BaseEmulator
         );
     }
 
+    /**
+     * @param \SoapServer $soapServer
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
     protected function handleSoap(\SoapServer $soapServer)
     {
         ob_start();
@@ -42,6 +45,9 @@ class Emulator extends BaseEmulator
         return $response->setContent(ob_get_clean());
     }
 
+    /**
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
     protected function OnlineLookup()
     {
         $server = $this->createSoapServer(
@@ -54,6 +60,9 @@ class Emulator extends BaseEmulator
         return $this->handleSoap($server);
     }
 
+    /**
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
     protected function Identification()
     {
         $server = $this->createSoapServer(
@@ -68,6 +77,9 @@ class Emulator extends BaseEmulator
         return $this->handleSoap($server);
     }
 
+    /**
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
     protected function Subscription()
     {
         $server = $this->createSoapServer(
@@ -80,6 +92,9 @@ class Emulator extends BaseEmulator
         return $this->handleSoap($server);
     }
 
+    /**
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
     protected function redirectUrl()
     {
         $rid = $this->request->get('rid');

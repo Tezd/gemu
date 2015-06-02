@@ -49,8 +49,8 @@ class Controller
     {
         $gateways = array();
         $dh  = opendir(__DIR__.'/../../Gateway');
-        while(false !== ($filename = readdir($dh))) {
-            if(!in_array($filename, array('.', '..'))) {
+        while (false !== ($filename = readdir($dh))) {
+            if (!in_array($filename, array('.', '..'))) {
                 $gateways[] = $filename;
             }
         }
