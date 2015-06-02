@@ -6,6 +6,7 @@ use Gemu\Core\Error\BadEndPoint;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
+ * @todo make possible to use it for soap 
  * Class EndPoint
  * @package Gemu\Core\Gateway\Response
  */
@@ -34,21 +35,13 @@ abstract class EndPoint
      */
     protected function invokeEndPoint()
     {
-        if(
-            ($endPoint = $this->getEndPoint($this->request))
+        if (($endPoint = $this->getEndPoint($this->request))
             && method_exists($this, $endPoint)
         ) {
             return $this->$endPoint();
         }
         throw new BadEndPoint(get_called_class(), $endPoint);
     }
-
-    /* *
-     * @param string $endPoint
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-//    abstract protected function invoke($endPoint);
 
     /**
      * Get method which we need to invoke inside emulator based on request

@@ -87,7 +87,8 @@ class Cache
         return json_decode(
             $this->redis->get(
                 $this->getKey(
-                    self::PARAMS_PREFIX, $key
+                    self::PARAMS_PREFIX,
+                    $key
                 )
             ),
             true

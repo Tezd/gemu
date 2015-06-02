@@ -4,8 +4,15 @@ namespace Gemu\Gateway\NetM;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 
+/**
+ * Class Service
+ * @package Gemu\Gateway\NetM
+ */
 class Service extends \Gemu\Core\Gateway\Response\Service
 {
+    /**
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
     protected function operators()
     {
         return new JsonResponse(
@@ -17,6 +24,4 @@ class Service extends \Gemu\Core\Gateway\Response\Service
             )
         );
     }
-
-
 }

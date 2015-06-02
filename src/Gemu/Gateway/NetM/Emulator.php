@@ -24,6 +24,11 @@ class Emulator extends BaseEmulator
             parent::getEndPoint();
     }
 
+    /**
+     * @param $endPoint
+     *
+     * @return string
+     */
     protected function getLocalUrl($endPoint)
     {
         return 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['SCRIPT_NAME'].$endPoint;
@@ -49,6 +54,19 @@ class Emulator extends BaseEmulator
     }
 
     /**
+     * Calls initialize and persist params inside of cache for later use
+     * @param $transactionKey
+     *
+     * @return array
+     */
+    protected function getParams($transactionKey)
+    {
+        $params = $this->initParams($transactionKey);
+        $this->cache->updateParams($transactionKey, $params);
+        return $params;
+    }
+
+    /**
      * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function PrepareSubscription()
@@ -60,8 +78,8 @@ class Emulator extends BaseEmulator
             $statusCode = 305;
             $statusText = 'Low credit';
         } else {
-        $statusCode = 0;
-        $statusText = 'OK';
+            $statusCode = 0;
+            $statusText = 'OK';
         }
 
         if ($params['config']['operator'] > 2) {
@@ -204,8 +222,7 @@ HERE;
 
         $url = $this->makeUrl($this->getLocalUrl('/emulate/NetM/confirm'), array('rid' => $params['rid']));
 
-        if ($params['config']['operator'] > 2)
-        {
+        if ($params['config']['operator'] > 2) {
             $fContent = file_get_contents('optin.html');
             $fContent = str_replace('$TITLE', 'Opt-in 2', $fContent);
             $fContent = str_replace('$BANNER', $params['PurchaseBanner'], $fContent);

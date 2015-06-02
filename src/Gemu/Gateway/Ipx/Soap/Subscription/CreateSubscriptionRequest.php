@@ -2,6 +2,10 @@
 
 namespace Gemu\Gateway\Ipx\Soap\Subscription;
 
+/**
+ * Class CreateSubscriptionRequest
+ * @package Gemu\Gateway\Ipx\Soap\Subscription
+ */
 class CreateSubscriptionRequest
 {
     public $correlationId;

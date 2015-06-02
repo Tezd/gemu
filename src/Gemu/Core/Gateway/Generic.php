@@ -25,7 +25,7 @@ class Generic
      * @param \Gemu\Core\Gateway\Response\Emulator $emulator
      * @param \Gemu\Core\Gateway\Response\Service $service
      */
-    public function __construct(Emulator $emulator,Service $service)
+    public function __construct(Emulator $emulator, Service $service)
     {
         $this->emulator = $emulator;
         $this->service = $service;

@@ -2,6 +2,10 @@
 
 namespace Gemu\Gateway\Ipx\Soap\Identification;
 
+/**
+ * Class CreateSessionRequest
+ * @package Gemu\Gateway\Ipx\Soap\Identification
+ */
 class CreateSessionRequest
 {
     public $correlationId;
