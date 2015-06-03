@@ -3,6 +3,8 @@
 namespace Gemu\Gateway\Ipx\Soap;
 
 use Gemu\Core\Cache;
+use Gemu\Gateway\Ipx\Soap\Subscription\AuthorizePaymentRequest;
+use Gemu\Gateway\Ipx\Soap\Subscription\CapturePaymentRequest;
 use Gemu\Gateway\Ipx\Soap\Subscription\CreateSubscriptionRequest;
 
 /**
@@ -44,6 +46,42 @@ class Subscription
             'responseCode' => 0,
             'reasonCode' => 0,
             'responseMessage' => ''
+        );
+    }
+
+    /**
+     * @param \Gemu\Gateway\Ipx\Soap\Subscription\AuthorizePaymentRequest $request
+     *
+     * @return array
+     */
+    public function authorizePayment(AuthorizePaymentRequest $request)
+    {
+        return array(
+            'correlationId' => $request->correlationId,
+            'sessionId' => $request->correlationId,
+            'authorizationLevel' => 1,
+            'responseCode' => 0,
+            'reasonCode' => 0,
+            'responseMessage' => '',
+            'temporaryError' => false,
+        );
+    }
+
+    /**
+     * @param \Gemu\Gateway\Ipx\Soap\Subscription\CapturePaymentRequest $request
+     *
+     * @return array
+     */
+    public function capturePayment(CapturePaymentRequest $request)
+    {
+        return array(
+            'correlationId' => $request->correlationId,
+            'transactionId' => $request->correlationId,
+            'responseCode' => 0,
+            'reasonCode' => 0,
+            'responseMessage' => '',
+            'temporaryError' => false,
+            'billingStatus' => 2,
         );
     }
 }
