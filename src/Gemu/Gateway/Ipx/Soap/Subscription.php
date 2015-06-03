@@ -6,6 +6,7 @@ use Gemu\Core\Cache;
 use Gemu\Gateway\Ipx\Soap\Subscription\AuthorizePaymentRequest;
 use Gemu\Gateway\Ipx\Soap\Subscription\CapturePaymentRequest;
 use Gemu\Gateway\Ipx\Soap\Subscription\CreateSubscriptionRequest;
+use Gemu\Gateway\Ipx\Soap\Subscription\GetSubscriptionStatusRequest;
 
 /**
  * Class Subscription
@@ -50,12 +51,31 @@ class Subscription
     }
 
     /**
+     * @param \Gemu\Gateway\Ipx\Soap\Subscription\GetSubscriptionStatusRequest $request
+     *
+     * @return array
+     */
+    public function getSubscriptionStatus(GetSubscriptionStatusRequest $request)
+    {
+        $this->cache->pushLog($request->correlationId, 'getSubscriptionStatus');
+        return array(
+            'correlationId' => $request->correlationId,
+            'subscriptionStatus' => 1,
+            'subscriptionStatusMessage' => 'The subscription is active and ready for use',
+            'responseCode' => 0,
+            'responseMessage' => ''
+        );
+    }
+
+
+    /**
      * @param \Gemu\Gateway\Ipx\Soap\Subscription\AuthorizePaymentRequest $request
      *
      * @return array
      */
     public function authorizePayment(AuthorizePaymentRequest $request)
     {
+        $this->cache->pushLog($request->correlationId, 'authorizePayment');
         return array(
             'correlationId' => $request->correlationId,
             'sessionId' => $request->correlationId,
@@ -74,6 +94,7 @@ class Subscription
      */
     public function capturePayment(CapturePaymentRequest $request)
     {
+        $this->cache->pushLog($request->correlationId, 'capturePayment');
         return array(
             'correlationId' => $request->correlationId,
             'transactionId' => $request->correlationId,
