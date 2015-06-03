@@ -6,6 +6,7 @@ use Gemu\Core\Gateway\Response\Emulator as BaseEmulator;
 use Gemu\Gateway\Ipx\Soap\Identification;
 use Gemu\Gateway\Ipx\Soap\OnlineLookup;
 use Gemu\Gateway\Ipx\Soap\Subscription;
+use Gemu\Gateway\Ipx\Soap\Test;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -85,7 +86,10 @@ class Emulator extends BaseEmulator
         $server = $this->createSoapServer(
             'Subscription.wsdl',
             array(
-                'CreateSubscriptionRequest' => '\\Gemu\\Gateway\\Ipx\\Soap\\Subscription\\CreateSubscriptionRequest'
+                'CreateSubscriptionRequest' => '\\Gemu\\Gateway\\Ipx\\Soap\\Subscription\\CreateSubscriptionRequest',
+                'AuthorizePaymentRequest' => '\\Gemu\\Gateway\\Ipx\\Soap\\Subscription\\AuthorizePaymentRequest',
+                'CapturePaymentRequest' => '\\Gemu\\Gateway\\Ipx\\Soap\\Subscription\\CapturePaymentRequest',
+                'GetSubscriptionStatusRequest' => '\\Gemu\\Gateway\\Ipx\\Soap\\Subscription\\GetSubscriptionStatusRequest'
             )
         );
         $server->setObject(new Subscription($this->cache));

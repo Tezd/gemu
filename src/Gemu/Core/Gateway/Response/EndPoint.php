@@ -6,7 +6,7 @@ use Gemu\Core\Error\BadEndPoint;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * @todo make possible to use it for soap 
+ * @todo make possible to use it for soap
  * Class EndPoint
  * @package Gemu\Core\Gateway\Response
  */
