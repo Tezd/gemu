@@ -340,7 +340,7 @@
     </binding>
     <service name="SubscriptionApiService">
         <port name="SubscriptionApi40" binding="tns:SubscriptionApiBinding">
-            <soap:address location="http://172.19.0.2/gemu/emulate/Ipx/Subscription"/>
+            <soap:address location="http://gemu.app/emulate/Ipx/Subscription"/>
         </port>
     </service>
 </definitions>

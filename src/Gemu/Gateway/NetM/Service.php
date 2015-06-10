@@ -2,13 +2,14 @@
 
 namespace Gemu\Gateway\NetM;
 
+use Gemu\Core\Gateway\EndPoint\Service as BaseService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * Class Service
  * @package Gemu\Gateway\NetM
  */
-class Service extends \Gemu\Core\Gateway\Response\Service
+class Service extends BaseService
 {
     /**
      * @return \Symfony\Component\HttpFoundation\JsonResponse

@@ -55,7 +55,7 @@
     </binding>
     <service name="OnlineLookupApiService">
         <port name="OnlineLookupApi10" binding="tns:OnlineLookupApiBinding">
-            <soap:address location="http://172.19.0.2/gemu/emulate/Ipx/OnlineLookup"/>
+            <soap:address location="http://gemu.app/emulate/Ipx/OnlineLookup"/>
         </port>
     </service>
 </definitions>

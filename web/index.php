@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 use Symfony\Component\HttpFoundation\Request;
 
@@ -30,26 +30,5 @@ $app->post('save/transaction', function(Request $request) use ($app) {
     );
 });
 
-//$app->get('log', function(Request $request) use ($app) {
-//
-//    header("Content-Type: text/event-stream\n\n");
-//
-//    /** @type \Gemu\Core\Cache $cache */
-//    $cache = $app['gemu.factory']->getCache();
-//    $transactionId = $request->query->get('transactionId');
-//
-//    while (1) {
-//        $log = $cache->popLog($transactionId);
-//
-//        if ($log) {
-//            echo "data: " . $log . "\n\n";
-//        }
-//
-//        ob_flush();
-//        flush();
-//
-//        usleep(250000);
-//    }
-//});
-
+$app['debug'] = true;
 $app->run();

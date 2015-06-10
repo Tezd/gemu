@@ -84,7 +84,7 @@ class Cache
      */
     public function loadParams($key)
     {
-        return json_decode(
+        return (array)json_decode(
             $this->redis->get(
                 $this->getKey(
                     self::PARAMS_PREFIX,

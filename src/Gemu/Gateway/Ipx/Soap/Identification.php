@@ -2,10 +2,7 @@
 
 namespace Gemu\Gateway\Ipx\Soap;
 
-use Gemu\Core\Cache;
-use Gemu\Gateway\Ipx\Soap\Identification\CheckStatusRequest;
-use Gemu\Gateway\Ipx\Soap\Identification\CreateSessionRequest;
-use Gemu\Gateway\Ipx\Soap\Identification\FinalizeSessionRequest;
+use Gemu\Core\Gateway\EndPoint\Emulator\Handler;
 
 /**
  * Class Identification
@@ -13,50 +10,39 @@ use Gemu\Gateway\Ipx\Soap\Identification\FinalizeSessionRequest;
  */
 class Identification
 {
+    use Handler;
 
     /**
-     * @type \Gemu\Core\Cache
-     */
-    protected $cache;
-
-    /**
-     * @param \Gemu\Core\Cache $cache
-     */
-    public function __construct(Cache $cache)
-    {
-        $this->cache = $cache;
-    }
-
-    /**
-     * @param \Gemu\Gateway\Ipx\Soap\Identification\CreateSessionRequest $request
+     * @param array $request
      *
      * @return array
      */
-    public function createSession(CreateSessionRequest $request)
+    protected function createSession($request)
     {
-        $params = $this->cache->loadParams($request->correlationId);
-        $params['return_url'] = $request->returnURL;
-        $this->cache->updateParams($request->correlationId, $params);
-        $this->cache->pushLog($request->correlationId, 'CreateSession');
+        $params = $this->loadParams();
+//        $params = $this->cache->loadParams($request['correlationId']);
+        $params['return_url'] = $request['returnURL'];
+        $this->updateParams($params);
+//        $this->cache->updateParams($request['correlationId'], $params);
+
         return array(
-            'correlationId' => $request->correlationId,
-            'sessionId' => $request->returnURL,
-            'redirectURL' => 'http://172.19.0.2/gemu/emulate/Ipx/redirectUrl?rid='.$request->correlationId,
+            'correlationId' => $request['correlationId'],
+            'sessionId' => $request['returnURL'],
+            'redirectURL' => 'http://gemu.app/emulate/Ipx/redirectUrl?rid='.$request['correlationId'],
             'responseCode' => 0,
             'responseMessage' => '',
         );
     }
 
     /**
-     * @param \Gemu\Gateway\Ipx\Soap\Identification\CheckStatusRequest $request
+     * @param array $request
      *
      * @return array
      */
-    public function checkStatus(CheckStatusRequest $request)
+    protected function checkStatus(array $request)
     {
-        $this->cache->pushLog($request->correlationId, 'CheckStatus');
         return array(
-            'correlationId' => $request->correlationId,
+            'correlationId' => $request['correlationId'],
             'statusCode' => 1,
             'statusReasonCode' => 0,
             'statusMessage' => '',
@@ -66,16 +52,16 @@ class Identification
     }
 
     /**
-     * @param \Gemu\Gateway\Ipx\Soap\Identification\FinalizeSessionRequest $request
+     * @param array $request
      *
      * @return array
      */
-    public function finalizeSession(FinalizeSessionRequest $request)
+    protected function finalizeSession(array $request)
     {
-        $this->cache->pushLog($request->correlationId, 'finalizeSession');
-        $params = $this->cache->loadParams($request->correlationId);
+        $params = $this->loadParams();
+        $params = $this->cache->loadParams($request['correlationId']);
         return array(
-            'correlationId' => $request->correlationId,
+            'correlationId' => $request['correlationId'],
             'transactionId' => uniqid(),
             'consumerId' => $params['config']['msisdn'],
             'operator' => $params['config']['operator'],
@@ -85,5 +71,27 @@ class Identification
             'responseCode' => 0,
             'responseMessage' => '',
         );
+    }
+
+    /**
+     * @param string $name
+     *
+     * @param array $data
+     *
+     * @return string
+     */
+    protected function getTransactionKey($name, array $data)
+    {
+        return $data['correlationId'];
+    }
+
+    /**
+     * @param mixed $rawData
+     *
+     * @return array
+     */
+    protected function getData($rawData)
+    {
+       return (array)$rawData;
     }
 }

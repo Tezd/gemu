@@ -1,28 +1,18 @@
 <?php
 
-namespace Gemu\Core\Gateway\Response;
+namespace Gemu\Core\Gateway\EndPoint;
 
-use Gemu\Core\Cache;
+use Gemu\Core\Gateway\EndPoint;
+use Gemu\Core\Gateway\EndPoint\Emulator\Handler;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class Emulator
- * @package Gemu\Gateway\Response
+ * @package Gemu\Core\Gateway\EndPoint\Emulator
  */
 abstract class Emulator extends EndPoint
 {
-    /**
-     * @type \Gemu\Core\Cache
-     */
-    protected $cache;
-
-    /**
-     * @param \Gemu\Core\Cache $cache
-     */
-    public function __construct(Cache $cache)
-    {
-        $this->cache = $cache;
-    }
+    use Handler;
 
     /**
      * @todo Refactor this
@@ -45,6 +35,19 @@ abstract class Emulator extends EndPoint
      */
     public function emulate(Request $request)
     {
-        return $this->prepare($request)->invokeEndPoint();
+        return $this->invokeEndPoint($request);
+    }
+
+    /**
+     * @param \Symfony\Component\HttpFoundation\Request $rawData
+     *
+     * @return array
+     */
+    protected function getData($rawData)
+    {
+        return array_merge(
+            $rawData->query->all(),
+            $rawData->request->all()
+        );
     }
 }

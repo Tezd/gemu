@@ -2,8 +2,8 @@
 
 namespace Gemu\Gateway\Ipx\Soap;
 
-use Gemu\Core\Cache;
-use Gemu\Gateway\Ipx\Soap\OnlineLookup\ResolveClientIPRequest;
+use Gemu\Core\Gateway\EndPoint\Emulator\Handler;
+//use Gemu\Gateway\Ipx\Soap\OnlineLookup\ResolveClientIPRequest;
 
 /**
  * Class OnlineLookup
@@ -11,39 +11,31 @@ use Gemu\Gateway\Ipx\Soap\OnlineLookup\ResolveClientIPRequest;
  */
 class OnlineLookup
 {
-    /**
-     * @type \Gemu\Core\Cache
-     */
-    protected $cache;
+    use Handler;
 
     /**
-     * @param \Gemu\Core\Cache $cache
-     */
-    public function __construct(Cache $cache)
-    {
-        $this->cache = $cache;
-    }
-
-    /**
-     * @param \Gemu\Gateway\Ipx\Soap\OnlineLookup\ResolveClientIPRequest $request
+     * @param array $request
      *
      * @return array
      */
-    public function resolveClientIP(ResolveClientIPRequest $request)
+    protected function resolveClientIP(array $request)
     {
-        $params = $this->cache->loadParams($request->correlationId);
+        $params = $this->loadParams();
+//        $params = $this->cache->loadParams($request['correlationId']);
 
         if ($params['config']['flow'] == '3g') {
-            $this->cache->pushLog($request->correlationId, 'Moving to 3g flow');
+            $this->pushInfo('Moving to 3g flow');
+//            $this->cache->pushLog($request['correlationId'], 'Moving to 3g flow');
             $responseCode = 0;
             $operator = $params['config']['operator'];
         } else {
-            $this->cache->pushLog($request->correlationId, 'Moving to wifi flow');
+            $this->pushInfo('Moving to wifi flow');
+//            $this->cache->pushLog($request['correlationId'], 'Moving to wifi flow');
             $responseCode = 3;
             $operator = '';
         }
         return array(
-            'correlationId' => $request->correlationId,
+            'correlationId' => $request['correlationId'],
             'lookupId' => uniqid(),
             'operator' => $operator,
             'operatorNetworkCode' => 'NTWRK',
@@ -52,5 +44,27 @@ class OnlineLookup
             'responseCode' => $responseCode,
             'responseMessage' => '',
         );
+    }
+
+    /**
+     * @param string $name
+     *
+     * @param array $data
+     *
+     * @return string
+     */
+    protected function getTransactionKey($name, array $data)
+    {
+        return $data['correlationId'];
+    }
+
+    /**
+     * @param \stdClass $rawData
+     *
+     * @return array
+     */
+    protected function getData($rawData)
+    {
+        return (array)$rawData;
     }
 }

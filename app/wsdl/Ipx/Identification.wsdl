@@ -141,7 +141,7 @@
     </binding>
     <service name="IdentificationApiService">
         <port name="IdentificationApi31" binding="tns:IdentificationApiBinding">
-            <soap:address location="http://172.19.0.2/gemu/emulate/Ipx/Identification"/>
+            <soap:address location="http://gemu.app/emulate/Ipx/Identification"/>
         </port>
     </service>
 </definitions>
