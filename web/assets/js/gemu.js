@@ -1,11 +1,17 @@
 /**
+ * @todo make it non global
+ */
+var source;
+/**
  * Class that listens for server side events from EventSource
  * and outputs them into log element in the window
  *
  * @param $log
  */
 var streamListener = function($log) {
-    var source;
+
+
+
     this.listen = function(transactionId) {
         if (source instanceof EventSource) {
             source.close();
@@ -13,7 +19,20 @@ var streamListener = function($log) {
         $log.children().remove();
         source = new EventSource("logs.php?transactionId=" + transactionId);
         source.onmessage = function(e) {
-            console.info(e);
+            var obj = JSON.parse(e.data);
+            var pClass = obj.scope;
+            if(typeof obj.data === 'string') {
+                $log.append('<p class="'+pClass+'">' + obj.data + '</p>');
+            }
+            else{
+                var innerHtml = '';
+                for(var prop in obj.data) {
+                    innerHtml += prop + ' : ' + obj.data[prop]+'<br/>';
+                }
+                $log.append('<p class="'+pClass+'">'+innerHtml+'</p>');
+            }
+            //for(var $txt)
+            //console.info(e);
             //$log.append('<p>' + e.data + '</p>');
         };
     };

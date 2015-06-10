@@ -73,7 +73,8 @@ trait Handler
             $this->transaction_key,
             json_encode(
                 [
-                    $scope => $logEntry
+                    'scope' => $scope,
+                    'data' => $logEntry
                 ]
             )
         );

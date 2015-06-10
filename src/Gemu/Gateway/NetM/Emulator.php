@@ -4,20 +4,24 @@ namespace Gemu\Gateway\NetM;
 
 use Gemu\Core\Gateway\EndPoint\Emulator as BaseEmulator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @todo create proper xml
  * @todo make functions private
+ * @todo make function names better
  * Class Emulator
  * @package Gemu\Gateway\NetM
  */
 class Emulator extends BaseEmulator
 {
     /**
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *
      * @return null|string
      */
-    protected function getEndPoint($request)
+    protected function getEndPoint(Request $request)
     {
         return $request->get('RequestType') ?
             $request->get('RequestType') :
@@ -35,46 +39,31 @@ class Emulator extends BaseEmulator
     }
 
     /**
-     * Initializes parameters for use inside of other emulator invoked methods
-     * @param string $transactionKey
-     *
-     * @return array
+     * @param array $params
      */
-    protected function initParams($transactionKey)
+    protected function mergeParams(array &$params)
     {
-        $params = array();
-        $params['rid'] = $transactionKey;
-        $params = array_merge(
-            $params,
-            $this->cache->loadParams($transactionKey),
-            $this->request->query->all(),
-            $this->request->request->all()
-        );
-        return $params;
+        $params = array_merge($params, $this->loadParams());
+        $this->updateParams($params);
     }
 
     /**
-     * Calls initialize and persist params inside of cache for later use
-     * @param $transactionKey
+     * @param array $request
      *
-     * @return array
-     */
-    protected function getParams($transactionKey)
-    {
-        $params = $this->initParams($transactionKey);
-        $this->cache->updateParams($transactionKey, $params);
-        return $params;
-    }
-
-    /**
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function prepareSubscription()
+    protected function prepareSubscription(array $request)
     {
-        $params = $this->getParams($this->request->get('RequestID'));
-        $paymentUrl = $this->makeUrl($this->getLocalUrl('/emulate/NetM/paymenturl'), array('rid' => $params['rid']));
+        $this->mergeParams($request);
+//        $params = $this->getParams($this->request->get('RequestID'));
+        $paymentUrl = $this->makeUrl(
+            $this->getLocalUrl('/emulate/NetM/paymenturl'),
+            [
+                'rid' => $this->transaction_key
+            ]
+        );
 
-        if (!empty($params['config']['low_balance'])) {
+        if (!empty($request['config']['low_balance'])) {
             $statusCode = 305;
             $statusText = 'Low credit';
         } else {
@@ -82,14 +71,24 @@ class Emulator extends BaseEmulator
             $statusText = 'OK';
         }
 
-        if ($params['config']['operator'] > 2) {
-            $this->cache->pushLog($params['rid'], 'Operator hosts optin1 and optin2 pages.');
-            $paymentUrl = $this->makeUrl($this->getLocalUrl('/emulate/NetM/optin'), array('rid' => $params['rid']));
+        if ($request['config']['operator'] > 2) {
+            $this->pushInfo('Operator hosts optin1 and optin2 pages.');
+            $paymentUrl = $this->makeUrl(
+                $this->getLocalUrl('/emulate/NetM/optin'),
+                [
+                    'rid' => $this->transaction_key
+                ]
+            );
         }
 
         // special case of o2 wifi
-        if ($params['config']['operator'] == 4 && $params['config']['flow'] == 'wifi') {
-            $paymentUrl = $this->makeUrl($this->getLocalUrl('/emulate/NetM/o2msisdn'), array('rid' => $params['rid']));
+        if ($request['config']['operator'] == 4 && $request['config']['flow'] == 'wifi') {
+            $paymentUrl = $this->makeUrl(
+                $this->getLocalUrl('/emulate/NetM/o2msisdn'),
+                [
+                    'rid' => $this->transaction_key
+                ]
+            );
         }
 
         $s = <<<HERE
@@ -98,8 +97,8 @@ class Emulator extends BaseEmulator
   <StatusCode>$statusCode</StatusCode>
   <StatusText>$statusText</StatusText>
   <TransactionType>synchronous</TransactionType>
-  <RequestID>{$params['rid']}</RequestID>
-  <TransactionID>{$params['rid']}</TransactionID>
+  <RequestID>{$this->transaction_key}</RequestID>
+  <TransactionID>{$this->transaction_key}</TransactionID>
   <ValidityPeriod>216000</ValidityPeriod>
   <PaymentURL>$paymentUrl</PaymentURL>
 </Response>
@@ -108,21 +107,26 @@ HERE;
         return new Response($s);
     }
 
-
-    protected function checkTan()
+    /**
+     * @param array $params
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    protected function checkTan(array $params)
     {
-        $params = $this->getParams($this->request->get('RequestID'));
+        $this->mergeParams($params);
+//        $params = $this->getParams($this->request->get('RequestID'));
 
         if ($params['Tan'] == '1234') {
             $statusCode = 0;
             $statusText = 'PIN correct';
-            $this->cache->pushLog($params['rid'], 'Pin verified');
-            $subId = substr($params['rid'], 0, 48);
-            $this->cache->pushLog($params['rid'], 'Subscription successful. Subscription ID: ' . $subId);
+            $this->pushInfo('Pin verified');
+            $subId = substr($this->transaction_key, 0, 48);
+            $this->pushInfo('Subscription successful. Subscription ID: ' . $subId);
         } else {
             $statusCode = 250;
             $statusText = 'PIN wrong';
-            $this->cache->pushLog($params['rid'], 'Invalid pin');
+            $this->pushInfo('Invalid pin');
         }
 
         $s = <<<HERE
@@ -131,8 +135,8 @@ HERE;
   <StatusCode>$statusCode</StatusCode>
   <StatusText>$statusText</StatusText>
   <TransactionType>synchronous</TransactionType>
-  <RequestID>{$params['rid']}</RequestID>
-  <TransactionID>{$params['rid']}</TransactionID>
+  <RequestID>{$this->transaction_key}</RequestID>
+  <TransactionID>{$this->transaction_key}</TransactionID>
 </Response>
 HERE;
 
@@ -142,11 +146,12 @@ HERE;
     /**
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function queryInfo()
+    protected function queryInfo(array $params)
     {
+        $this->mergeParams($params);
         $now = date('Y-m-d H:i:s');
 
-        $params = $this->getParams($this->request->get('RequestID'));
+//        $params = $this->getParams($this->request->get('RequestID'));
 
         if ($params['config']['flow'] == '3g' || $params['config']['operator'] == 4) {
             $msisdn = $params['config']['msisdn'];
@@ -164,8 +169,8 @@ HERE;
 <Response type="QueryInfo">
   <StatusCode>0</StatusCode>
   <StatusText>OK</StatusText>
-  <RequestID>{$params['rid']}</RequestID>
-  <TransactionID>{$params['rid']}</TransactionID>
+  <RequestID>{$this->transaction_key}</RequestID>
+  <TransactionID>{$this->transaction_key}</TransactionID>
   <OperatorID>{$params['config']['operator']}</OperatorID>
   <PaymentOperatorID>{$params['config']['operator']}</PaymentOperatorID>
   <Description>{$params['Description']}</Description>
@@ -175,7 +180,7 @@ HERE;
   <Subscriptions>
     <Number>1</Number>
     <Subscription>
-      <SubscriptionID>{$params['rid']}</SubscriptionID>
+      <SubscriptionID>{$this->transaction_key}</SubscriptionID>
       <SubscriptionStatusCode>1</SubscriptionStatusCode>
       <SubscriptionStatusText>Subscription ready</SubscriptionStatusText>
       <ServiceID>web_de_abo</ServiceID>
@@ -196,17 +201,18 @@ HERE;
         return new Response($s);
     }
 
-    protected function prepareInfo()
+    protected function prepareInfo(array $params)
     {
-        $params = $this->getParams($this->request->get('RequestID'));
+        $this->mergeParams($params);
+//        $params = $this->getParams($this->request->get('RequestID'));
         $infoUrl = $this->makeUrl($this->getLocalUrl('/emulate/NetM/detectinfo'));
         $s = <<<HERE
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <Response type="PrepareInfo">
   <StatusCode>0</StatusCode>
   <StatusText>OK</StatusText>
-  <RequestID>{$params['rid']}</RequestID>
-  <TransactionID>{$params['rid']}</TransactionID>
+  <RequestID>{$this->transaction_key}</RequestID>
+  <TransactionID>{$this->transaction_key}</TransactionID>
   <InfoURL>${infoUrl}</InfoURL>
 </Response>
 HERE;
@@ -216,11 +222,12 @@ HERE;
     /**
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function paymentUrl()
+    protected function paymentUrl(array $params)
     {
-        $params = $this->getParams($this->request->get('rid'));
+        $this->mergeParams($params);
+//        $params = $this->getParams($this->request->get('rid'));
 
-        $url = $this->makeUrl($this->getLocalUrl('/emulate/NetM/confirm'), array('rid' => $params['rid']));
+        $url = $this->makeUrl($this->getLocalUrl('/emulate/NetM/confirm'), array('rid' => $this->transaction_key));
 
         if ($params['config']['operator'] > 2) {
             $fContent = file_get_contents('optin.html');
@@ -234,7 +241,7 @@ HERE;
         $contents = file_get_contents($params['ConfirmationURL']);
         $contents = str_replace('$PRODUCT_URL', $url, $contents);
 
-        $this->cache->pushLog($params['rid'], 'Going to Optin2 page.');
+        $this->pushInfo('Going to Optin2 page.');
 
         return new Response($contents);
     }
@@ -242,13 +249,13 @@ HERE;
     /**
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    protected function detectInfo()
+    protected function detectInfo(array $params)
     {
-        $params = $this->getParams($this->request->get('rid'));
+        $this->mergeParams($params);
+//        $params = $this->getParams($this->request->get('rid'));
 
         if ($params['config']['flow'] == '3g') {
-            $this->cache->pushLog(
-                $params['rid'],
+            $this->pushInfo(
                 sprintf(
                     'MSISDN detected as %s. Initiating  3G flow.',
                     $params['config']['msisdn']
@@ -256,36 +263,35 @@ HERE;
             );
             $code = 0;
         } else {
-            $this->cache->pushLog(
-                $params['rid'],
-                'MSISDN not detected. Initiating Wifi flow.'
-            );
+            $this->pushInfo('MSISDN not detected. Initiating Wifi flow.');
             $code = 151;
         }
+
         return new RedirectResponse(
             $params['CustomerURL'].'?'.http_build_query(
                 array(
                     'trid' => $params['TransactionID'],
                     'code' => $code,
-                    'rid' => $params['rid'],
+                    'rid' => $this->transaction_key,
                 )
             )
         );
     }
 
-    protected function optIn()
+    protected function optIn(array $params)
     {
-        $params = $this->getParams($this->request->get('rid'));
+        $this->mergeParams($params);
+//        $params = $this->getParams($this->request->get('rid'));
 
-        $url = $this->makeUrl($this->getLocalUrl('/emulate/NetM/paymenturl'), array('rid' => $params['rid']));
+        $url = $this->makeUrl($this->getLocalUrl('/emulate/NetM/paymenturl'), array('rid' => $this->transaction_key));
 
         $fContent = file_get_contents('optin.html');
         $fContent = str_replace('$TITLE', 'Opt-in 1', $fContent);
         $fContent = str_replace('$BANNER', $params['PurchaseBanner'], $fContent);
         $fContent = str_replace('$IMAGE', $params['PurchaseImage'], $fContent);
         $fContent = str_replace('$URL', $url, $fContent);
-
-        $this->cache->pushLog($params['rid'], 'Going to Optin1 page.');
+        $this->pushInfo('Going to Optin1 page.');
+//        $this->cache->pushLog($this->transaction_key, );
 
         return new Response($fContent);
     }
@@ -293,31 +299,34 @@ HERE;
     /**
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    protected function o2msisdn()
+    protected function o2msisdn(array $params)
     {
-        $params = $this->getParams($this->request->get('rid'));
+        $this->mergeParams($params);
+//        $params = $this->getParams($this->request->get('rid'));
         return new RedirectResponse(
             $this->makeUrl(
                 $params['ProductURL'],
                 array(
-                    'rid' => $params['rid'],
+                    'rid' => $this->transaction_key,
                     'code' => 0,
-                    'sid' => $params['rid'],
+                    'sid' => $this->transaction_key,
                 )
             )
         );
     }
 
-    protected function confirm()
+    protected function confirm(array $params)
     {
-        $params = $this->getParams($this->request->get('rid'));
-        $subId = substr($params['rid'], 0, 48);
-        $this->cache->pushLog($params['rid'], 'Subscription successful. Subscription ID: ' . $subId);
+        $this->mergeParams($params);
+//        $params = $this->getParams($this->request->get('rid'));
+        $subId = substr($this->transaction_key, 0, 48);
+        $this->pushInfo('Subscription successful. Subscription ID: ' . $subId);
+//        $this->cache->pushLog($params['rid'], 'Subscription successful. Subscription ID: ' . $subId);
         return new RedirectResponse(
             $this->makeUrl(
                 $params['ProductURL'],
                 array(
-                    'rid' => $params['rid']
+                    'rid' => $this->transaction_key
                 )
             )
         );
@@ -326,23 +335,25 @@ HERE;
     /**
      * @param string $name
      *
+     * @param array $data
+     *
      * @return string
      */
-    protected function getTransactionKey($name)
+    protected function getTransactionKey($name, array $data)
     {
-        switch($name)
+        switch(strtolower($name))
         {
             case 'o2msisdn':
             case 'confirm':
-            case 'optIn':
-            case 'detectInfo':
-            case 'paymentUrl':
-                return 'rid';
-            case 'prepareInfo':
-            case 'queryInfo':
-            case 'checkTan':
-            case 'prepareSubscription':
-                return 'RequestID';
+            case 'optin':
+            case 'detectinfo':
+            case 'paymenturl':
+                return $data['rid'];
+            case 'prepareinfo':
+            case 'queryinfo':
+            case 'checktan':
+            case 'preparesubscription':
+                return $data['RequestID'];
         }
     }
 }
