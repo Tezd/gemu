@@ -1,29 +1,29 @@
 <?php
 
-namespace Gemu\Core\Gateway;
+namespace Gemu\Core;
 
-use Gemu\Core\Gateway\Response\Service;
-use Gemu\Core\Gateway\Response\Emulator;
+use Gemu\Core\Gateway\EndPoint\Service;
+use Gemu\Core\Gateway\EndPoint\Emulator;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Class Generic
- * @package Gemu\Core\Gateway
+ * Class Gateway
+ * @package Gemu\Core
  */
-class Generic
+class Gateway
 {
     /**
-     * @type \Gemu\Core\Gateway\Response\Emulator
+     * @type \Gemu\Core\Gateway\EndPoint\Emulator
      */
     protected $emulator;
     /**
-     * @type \Gemu\Core\Gateway\Response\Service
+     * @type \Gemu\Core\Gateway\EndPoint\Service
      */
     protected $service;
 
     /**
-     * @param \Gemu\Core\Gateway\Response\Emulator $emulator
-     * @param \Gemu\Core\Gateway\Response\Service $service
+     * @param \Gemu\Core\Gateway\EndPoint\Emulator $emulator
+     * @param \Gemu\Core\Gateway\EndPoint\Service $service
      */
     public function __construct(Emulator $emulator, Service $service)
     {

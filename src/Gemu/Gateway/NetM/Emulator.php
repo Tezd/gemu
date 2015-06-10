@@ -2,7 +2,7 @@
 
 namespace Gemu\Gateway\NetM;
 
-use Gemu\Core\Gateway\Response\Emulator as BaseEmulator;
+use Gemu\Core\Gateway\EndPoint\Emulator as BaseEmulator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -17,15 +17,15 @@ class Emulator extends BaseEmulator
     /**
      * @return null|string
      */
-    protected function getEndPoint()
+    protected function getEndPoint($request)
     {
-        return $this->request->get('RequestType') ?
-            $this->request->get('RequestType') :
-            parent::getEndPoint();
+        return $request->get('RequestType') ?
+            $request->get('RequestType') :
+            parent::getEndPoint($request);
     }
 
     /**
-     * @param $endPoint
+     * @param string $endPoint
      *
      * @return string
      */
@@ -69,7 +69,7 @@ class Emulator extends BaseEmulator
     /**
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function PrepareSubscription()
+    protected function prepareSubscription()
     {
         $params = $this->getParams($this->request->get('RequestID'));
         $paymentUrl = $this->makeUrl($this->getLocalUrl('/emulate/NetM/paymenturl'), array('rid' => $params['rid']));
@@ -109,7 +109,7 @@ HERE;
     }
 
 
-    protected function CheckTan()
+    protected function checkTan()
     {
         $params = $this->getParams($this->request->get('RequestID'));
 
@@ -142,7 +142,7 @@ HERE;
     /**
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function QueryInfo()
+    protected function queryInfo()
     {
         $now = date('Y-m-d H:i:s');
 
@@ -321,5 +321,28 @@ HERE;
                 )
             )
         );
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return string
+     */
+    protected function getTransactionKey($name)
+    {
+        switch($name)
+        {
+            case 'o2msisdn':
+            case 'confirm':
+            case 'optIn':
+            case 'detectInfo':
+            case 'paymentUrl':
+                return 'rid';
+            case 'prepareInfo':
+            case 'queryInfo':
+            case 'checkTan':
+            case 'prepareSubscription':
+                return 'RequestID';
+        }
     }
 }

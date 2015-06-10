@@ -13,7 +13,8 @@ var streamListener = function($log) {
         $log.children().remove();
         source = new EventSource("logs.php?transactionId=" + transactionId);
         source.onmessage = function(e) {
-            $log.append('<p>' + e.data + '</p>');
+            console.info(e);
+            //$log.append('<p>' + e.data + '</p>');
         };
     };
 };

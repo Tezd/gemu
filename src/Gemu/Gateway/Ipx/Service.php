@@ -2,13 +2,14 @@
 
 namespace Gemu\Gateway\Ipx;
 
+use Gemu\Core\Gateway\EndPoint\Service as BaseService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * Class Service
  * @package Gemu\Gateway\Ipx
  */
-class Service extends \Gemu\Core\Gateway\Response\Service
+class Service extends BaseService
 {
     /**
      * @return \Symfony\Component\HttpFoundation\JsonResponse
@@ -16,10 +17,10 @@ class Service extends \Gemu\Core\Gateway\Response\Service
     protected function operators()
     {
         return new JsonResponse(
-            array(
+            [
                 'AIRTEL' => 'Vodafone',
                 'WHATEVER' => 'Yoigo',
-            )
+            ]
         );
     }
 }

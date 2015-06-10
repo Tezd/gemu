@@ -1,13 +1,13 @@
 <?php
 
-namespace Gemu\Core\Gateway\Response;
+namespace Gemu\Core\Gateway\EndPoint;
 
-use Gemu\Core\Error\BadEndPoint;
+use Gemu\Core\Gateway\EndPoint;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class Service
- * @package Gemu\Core\Gateway\Response
+ * @package Gemu\Core\Gateway\EndPoint
  */
 abstract class Service extends EndPoint
 {
@@ -19,6 +19,15 @@ abstract class Service extends EndPoint
      */
     public function handle(Request $request)
     {
-        return $this->prepare($request)->invokeEndPoint();
+        return $this->invokeEndPoint($request);
+    }
+
+    /**
+     * @param string $name
+     * @param array $arguments
+     */
+    public function __call($name, array $arguments)
+    {
+        return $this->$name($arguments[0]);
     }
 }

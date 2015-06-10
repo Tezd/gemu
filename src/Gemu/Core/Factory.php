@@ -2,8 +2,6 @@
 
 namespace Gemu\Core;
 
-use Gemu\Core\Cache;
-use Gemu\Core\Gateway\Generic as Gateway;
 use Gemu\Core\Error\NonExistingGatewayPart;
 use Predis\Client;
 
@@ -19,9 +17,9 @@ class Factory
     const GATEWAY_PART_RESPONSE_SERVICE = '\\Service';
 
     /**
-     * @param $gatewayName
+     * @param string $gatewayName
      *
-     * @return \Gemu\Core\Gateway\Generic
+     * @return \Gemu\Core\Gateway
      */
     public function getGateway($gatewayName)
     {
