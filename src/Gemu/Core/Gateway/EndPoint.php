@@ -6,28 +6,11 @@ use Gemu\Core\Error\BadEndPoint;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * @todo make possible to use it for soap
  * Class EndPoint
  * @package Gemu\Core\Gateway
  */
 abstract class EndPoint
 {
-//    /**
-//     * @type \Symfony\Component\HttpFoundation\Request $request
-//     */
-//    protected $request;
-//
-//    /**
-//     * @param \Symfony\Component\HttpFoundation\Request $request
-//     *
-//     * @return $this
-//     */
-//    protected function prepare(Request $request)
-//    {
-//        $this->request = $request;
-//        return $this;
-//    }
-
     /**
      *
      * @param \Symfony\Component\HttpFoundation\Request $request

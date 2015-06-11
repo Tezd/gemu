@@ -12,10 +12,6 @@ use Predis\Client;
  */
 class Factory
 {
-    const GATEWAY_NAMESPACE_PREFIX = '\\Gemu\\Gateway\\';
-    const GATEWAY_PART_RESPONSE_EMULATOR = '\\Emulator';
-    const GATEWAY_PART_RESPONSE_SERVICE = '\\Service';
-
     /**
      * @param string $gatewayName
      *
@@ -39,16 +35,16 @@ class Factory
     {
         return @array_map(
             function ($part) use ($gatewayName) {
-                $partClass = Factory::GATEWAY_NAMESPACE_PREFIX.$gatewayName.$part;
+                $partClass = '\\Gemu\\Gateway\\'.$gatewayName.$part;
                 if (!class_exists($partClass)) {
                     throw new NonExistingGatewayPart($partClass);
                 }
                 return $partClass;
             },
-            array(
-                'emulator' => self::GATEWAY_PART_RESPONSE_EMULATOR,
-                'service' => self::GATEWAY_PART_RESPONSE_SERVICE
-            )
+            [
+                'emulator' => '\\Emulator',
+                'service' => '\\Service'
+            ]
         );
     }
 

@@ -20,7 +20,6 @@ class Subscription
     protected function createSubscription(array $request)
     {
         $params = $this->loadParams();
-//        $params = $this->cache->loadParams($request['correlationId']);
         return array(
             'correlationId' => $request['correlationId'],
             'subscriptionId' => $request['correlationId'],

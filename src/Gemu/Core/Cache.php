@@ -24,7 +24,7 @@ class Cache
     }
 
     /**
-     * @param $id
+     * @param string $id
      * @param string $data
      *
      * @return string
@@ -78,7 +78,7 @@ class Cache
     }
 
     /**
-     * @param $key
+     * @param string $key
      *
      * @return array
      */
@@ -96,8 +96,8 @@ class Cache
     }
 
     /**
-     * @param $scope
-     * @param $key
+     * @param string $scope
+     * @param string $key
      *
      * @return string
      */
