@@ -97,7 +97,7 @@ trait Handler
      */
     public function __call($name, array $arguments)
     {
-        if(!method_exists($this, $name)) {
+        if (!method_exists($this, $name)) {
             throw new \BadFunctionCallException(
                 sprintf(
                     'Class[%s] doesn\'t support method[%s]. Maybe you forgot to add it?',
@@ -114,6 +114,4 @@ trait Handler
         $this->pushLog('response', $result);
         return $result;
     }
-
-
 }

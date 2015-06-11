@@ -55,12 +55,10 @@ class Emulator extends BaseEmulator
     protected function prepareSubscription(array $request)
     {
         $this->mergeParams($request);
-//        $params = $this->getParams($this->request->get('RequestID'));
+
         $paymentUrl = $this->makeUrl(
             $this->getLocalUrl('/emulate/NetM/paymenturl'),
-            [
-                'rid' => $this->transaction_key
-            ]
+            [ 'rid' => $this->transaction_key ]
         );
 
         if (!empty($request['config']['low_balance'])) {
@@ -75,9 +73,7 @@ class Emulator extends BaseEmulator
             $this->pushInfo('Operator hosts optin1 and optin2 pages.');
             $paymentUrl = $this->makeUrl(
                 $this->getLocalUrl('/emulate/NetM/optin'),
-                [
-                    'rid' => $this->transaction_key
-                ]
+                [ 'rid' => $this->transaction_key ]
             );
         }
 
@@ -85,9 +81,7 @@ class Emulator extends BaseEmulator
         if ($request['config']['operator'] == 4 && $request['config']['flow'] == 'wifi') {
             $paymentUrl = $this->makeUrl(
                 $this->getLocalUrl('/emulate/NetM/o2msisdn'),
-                [
-                    'rid' => $this->transaction_key
-                ]
+                [ 'rid' => $this->transaction_key ]
             );
         }
 
@@ -115,7 +109,6 @@ HERE;
     protected function checkTan(array $params)
     {
         $this->mergeParams($params);
-//        $params = $this->getParams($this->request->get('RequestID'));
 
         if ($params['Tan'] == '1234') {
             $statusCode = 0;
@@ -144,14 +137,14 @@ HERE;
     }
 
     /**
+     * @param array $params
+     *
      * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function queryInfo(array $params)
     {
         $this->mergeParams($params);
         $now = date('Y-m-d H:i:s');
-
-//        $params = $this->getParams($this->request->get('RequestID'));
 
         if ($params['config']['flow'] == '3g' || $params['config']['operator'] == 4) {
             $msisdn = $params['config']['msisdn'];
@@ -204,7 +197,6 @@ HERE;
     protected function prepareInfo(array $params)
     {
         $this->mergeParams($params);
-//        $params = $this->getParams($this->request->get('RequestID'));
         $infoUrl = $this->makeUrl($this->getLocalUrl('/emulate/NetM/detectinfo'));
         $s = <<<HERE
 <?xml version="1.0" encoding="ISO-8859-1"?>
@@ -220,12 +212,13 @@ HERE;
     }
 
     /**
+     * @param array $params
+     *
      * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function paymentUrl(array $params)
     {
         $this->mergeParams($params);
-//        $params = $this->getParams($this->request->get('rid'));
 
         $url = $this->makeUrl($this->getLocalUrl('/emulate/NetM/confirm'), array('rid' => $this->transaction_key));
 
@@ -247,12 +240,13 @@ HERE;
     }
 
     /**
+     * @param array $params
+     *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     protected function detectInfo(array $params)
     {
         $this->mergeParams($params);
-//        $params = $this->getParams($this->request->get('rid'));
 
         if ($params['config']['flow'] == '3g') {
             $this->pushInfo(
@@ -269,20 +263,23 @@ HERE;
 
         return new RedirectResponse(
             $params['CustomerURL'].'?'.http_build_query(
-                array(
+                [
                     'trid' => $params['TransactionID'],
                     'code' => $code,
                     'rid' => $this->transaction_key,
-                )
+                ]
             )
         );
     }
 
+    /**
+     * @param array $params
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
     protected function optIn(array $params)
     {
         $this->mergeParams($params);
-//        $params = $this->getParams($this->request->get('rid'));
-
         $url = $this->makeUrl($this->getLocalUrl('/emulate/NetM/paymenturl'), array('rid' => $this->transaction_key));
 
         $fContent = file_get_contents('optin.html');
@@ -291,43 +288,44 @@ HERE;
         $fContent = str_replace('$IMAGE', $params['PurchaseImage'], $fContent);
         $fContent = str_replace('$URL', $url, $fContent);
         $this->pushInfo('Going to Optin1 page.');
-//        $this->cache->pushLog($this->transaction_key, );
 
         return new Response($fContent);
     }
 
     /**
+     * @param array $params
+     *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     protected function o2msisdn(array $params)
     {
         $this->mergeParams($params);
-//        $params = $this->getParams($this->request->get('rid'));
         return new RedirectResponse(
             $this->makeUrl(
                 $params['ProductURL'],
-                array(
+                [
                     'rid' => $this->transaction_key,
                     'code' => 0,
                     'sid' => $this->transaction_key,
-                )
+                ]
             )
         );
     }
 
+    /**
+     * @param array $params
+     *
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
     protected function confirm(array $params)
     {
         $this->mergeParams($params);
-//        $params = $this->getParams($this->request->get('rid'));
         $subId = substr($this->transaction_key, 0, 48);
         $this->pushInfo('Subscription successful. Subscription ID: ' . $subId);
-//        $this->cache->pushLog($params['rid'], 'Subscription successful. Subscription ID: ' . $subId);
         return new RedirectResponse(
             $this->makeUrl(
                 $params['ProductURL'],
-                array(
-                    'rid' => $this->transaction_key
-                )
+                [ 'rid' => $this->transaction_key ]
             )
         );
     }

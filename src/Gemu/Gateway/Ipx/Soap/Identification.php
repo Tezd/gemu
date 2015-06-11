@@ -20,11 +20,8 @@ class Identification
     protected function createSession($request)
     {
         $params = $this->loadParams();
-//        $params = $this->cache->loadParams($request['correlationId']);
         $params['return_url'] = $request['returnURL'];
         $this->updateParams($params);
-//        $this->cache->updateParams($request['correlationId'], $params);
-
         return array(
             'correlationId' => $request['correlationId'],
             'sessionId' => $request['returnURL'],
@@ -59,7 +56,6 @@ class Identification
     protected function finalizeSession(array $request)
     {
         $params = $this->loadParams();
-        $params = $this->cache->loadParams($request['correlationId']);
         return array(
             'correlationId' => $request['correlationId'],
             'transactionId' => uniqid(),
@@ -92,6 +88,6 @@ class Identification
      */
     protected function getData($rawData)
     {
-       return (array)$rawData;
+        return (array)$rawData;
     }
 }

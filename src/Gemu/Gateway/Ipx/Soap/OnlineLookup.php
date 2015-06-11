@@ -3,6 +3,7 @@
 namespace Gemu\Gateway\Ipx\Soap;
 
 use Gemu\Core\Gateway\EndPoint\Emulator\Handler;
+
 //use Gemu\Gateway\Ipx\Soap\OnlineLookup\ResolveClientIPRequest;
 
 /**
@@ -21,16 +22,13 @@ class OnlineLookup
     protected function resolveClientIP(array $request)
     {
         $params = $this->loadParams();
-//        $params = $this->cache->loadParams($request['correlationId']);
 
         if ($params['config']['flow'] == '3g') {
             $this->pushInfo('Moving to 3g flow');
-//            $this->cache->pushLog($request['correlationId'], 'Moving to 3g flow');
             $responseCode = 0;
             $operator = $params['config']['operator'];
         } else {
             $this->pushInfo('Moving to wifi flow');
-//            $this->cache->pushLog($request['correlationId'], 'Moving to wifi flow');
             $responseCode = 3;
             $operator = '';
         }
