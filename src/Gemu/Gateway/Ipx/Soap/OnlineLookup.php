@@ -4,36 +4,34 @@ namespace Gemu\Gateway\Ipx\Soap;
 
 use Gemu\Core\Gateway\EndPoint\Emulator\Handler;
 
-//use Gemu\Gateway\Ipx\Soap\OnlineLookup\ResolveClientIPRequest;
-
 /**
  * Class OnlineLookup
  * @package Gemu\Gateway\Ipx\Soap
  */
-class OnlineLookup
+final class OnlineLookup
 {
     use Handler;
 
     /**
-     * @param array $request
+     * @param string $transactionId
      *
      * @return array
      */
-    protected function resolveClientIP(array $request)
+    protected function resolveClientIP($transactionId)
     {
-        $params = $this->loadParams();
+        $params = $this->cache->loadParams();
 
         if ($params['config']['flow'] == '3g') {
-            $this->pushInfo('Moving to 3g flow');
+            $this->cache->pushInfo('Moving to 3g flow');
             $responseCode = 0;
             $operator = $params['config']['operator'];
         } else {
-            $this->pushInfo('Moving to wifi flow');
+            $this->cache->pushInfo('Moving to wifi flow');
             $responseCode = 3;
             $operator = '';
         }
-        return array(
-            'correlationId' => $request['correlationId'],
+        return [
+            'correlationId' => $transactionId,
             'lookupId' => uniqid(),
             'operator' => $operator,
             'operatorNetworkCode' => 'NTWRK',
@@ -41,7 +39,7 @@ class OnlineLookup
             'countryName' => 'Espain',
             'responseCode' => $responseCode,
             'responseMessage' => '',
-        );
+        ];
     }
 
     /**
@@ -51,7 +49,7 @@ class OnlineLookup
      *
      * @return string
      */
-    protected function getTransactionKey($name, array $data)
+    protected function getTransactionId($name, array $data)
     {
         return $data['correlationId'];
     }

@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
  * Class Service
  * @package Gemu\Gateway\NetM
  */
-class Service extends BaseService
+final class Service extends BaseService
 {
     /**
      * @return \Symfony\Component\HttpFoundation\JsonResponse

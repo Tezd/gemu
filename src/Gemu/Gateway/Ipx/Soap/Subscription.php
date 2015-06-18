@@ -8,21 +8,21 @@ use Gemu\Core\Gateway\EndPoint\Emulator\Handler;
  * Class Subscription
  * @package Gemu\Gateway\Ipx\Soap
  */
-class Subscription
+final class Subscription
 {
     use Handler;
 
     /**
-     * @param array $request
+     * @param string $transactionId
      *
      * @return array
      */
-    protected function createSubscription(array $request)
+    protected function createSubscription($transactionId)
     {
-        $params = $this->loadParams();
-        return array(
-            'correlationId' => $request['correlationId'],
-            'subscriptionId' => $request['correlationId'],
+        $params = $this->cache->loadParams();
+        return [
+            'correlationId' => $transactionId,
+            'subscriptionId' => $transactionId,
             'subscriptionStatus' => 1,
             'subscriptionStatusMessage' => '',
             'operator' => $params['config']['operator'],
@@ -30,60 +30,60 @@ class Subscription
             'VAT' => 6.99,
             'responseCode' => 0,
             'reasonCode' => 0,
-            'responseMessage' => ''
-        );
+            'responseMessage' => '',
+        ];
     }
 
     /**
-     * @param array $request
+     * @param string $transactionId
      *
      * @return array
      */
-    protected function getSubscriptionStatus(array $request)
+    protected function getSubscriptionStatus($transactionId)
     {
-        return array(
-            'correlationId' => $request['correlationId'],
+        return [
+            'correlationId' => $transactionId,
             'subscriptionStatus' => 1,
             'subscriptionStatusMessage' => 'The subscription is active and ready for use',
             'responseCode' => 0,
-            'responseMessage' => ''
-        );
+            'responseMessage' => '',
+        ];
     }
 
     /**
-     * @param array $request
+     * @param string $transaction_id
      *
      * @return array
      */
-    protected function authorizePayment(array $request)
+    protected function authorizePayment($transaction_id)
     {
-        return array(
-            'correlationId' => $request['correlationId'],
-            'sessionId' => $request['correlationId'],
+        return [
+            'correlationId' => $transaction_id,
+            'sessionId' => $transaction_id,
             'authorizationLevel' => 1,
             'responseCode' => 0,
             'reasonCode' => 0,
             'responseMessage' => '',
             'temporaryError' => false,
-        );
+        ];
     }
 
     /**
-     * @param array $request
+     * @param string $transaction_id
      *
      * @return array
      */
-    protected function capturePayment(array $request)
+    protected function capturePayment($transaction_id)
     {
-        return array(
-            'correlationId' => $request['correlationId'],
-            'transactionId' => $request['correlationId'],
+        return [
+            'correlationId' => $transaction_id,
+            'transactionId' => $transaction_id,
             'responseCode' => 0,
             'reasonCode' => 0,
             'responseMessage' => '',
             'temporaryError' => false,
             'billingStatus' => 2,
-        );
+        ];
     }
 
     /**
@@ -93,7 +93,7 @@ class Subscription
      *
      * @return string
      */
-    protected function getTransactionKey($name, array $data)
+    protected function getTransactionId($name, array $data)
     {
         return $data['correlationId'];
     }
