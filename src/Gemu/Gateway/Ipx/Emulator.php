@@ -12,19 +12,15 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  * Class Emulator
  * @package Gemu\Gateway\Ipx
  */
-class Emulator extends SoapEmulator
+final class Emulator extends SoapEmulator
 {
     /**
-     * @param array $data
-     *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    protected function redirectUrl(array $data)
+    protected function redirectUrl()
     {
-        $params = $this->loadParams();
-        return new RedirectResponse(
-            $params['return_url']
-        );
+        $params = $this->cache->loadParams();
+        return new RedirectResponse($params['return_url']);
     }
 
     /**
@@ -34,7 +30,7 @@ class Emulator extends SoapEmulator
      *
      * @return string
      */
-    protected function getTransactionKey($name, array $data)
+    protected function getTransactionId($name, array $data)
     {
         return $data['rid'];
     }

@@ -2,7 +2,7 @@
 
 namespace Gemu\Core\Gateway\EndPoint\Emulator;
 
-use Gemu\Core\Cache;
+use Gemu\Core\Cache\Proxy;
 
 /**
  * Class Handler
@@ -11,16 +11,14 @@ use Gemu\Core\Cache;
 trait Handler
 {
     /**
-     * @type \Gemu\Core\Cache
+     * @type \Gemu\Core\Cache\Proxy
      */
     protected $cache;
 
-    protected $transaction_key;
-
     /**
-     * @param \Gemu\Core\Cache $cache
+     * @param \Gemu\Core\Cache\Proxy $cache
      */
-    public function __construct(Cache $cache)
+    public function __construct(Proxy $cache)
     {
         $this->cache = $cache;
     }
@@ -32,7 +30,7 @@ trait Handler
      *
      * @return string
      */
-    abstract protected function getTransactionKey($name, array $data);
+    abstract protected function getTransactionId($name, array $data);
 
     /**
      * @param mixed $rawData
@@ -40,55 +38,6 @@ trait Handler
      * @return array
      */
     abstract protected function getData($rawData);
-
-    /**
-     * @return array
-     */
-    protected function loadParams()
-    {
-        return $this->cache->loadParams($this->transaction_key);
-    }
-
-    /**
-     * @param array $params
-     *
-     * @return string
-     */
-    protected function updateParams(array $params)
-    {
-        return $this->cache->updateParams(
-            $this->transaction_key,
-            $params
-        );
-    }
-
-    /**
-     * @param array $logEntry
-     *
-     * @return string
-     */
-    protected function pushLog($scope, $logEntry)
-    {
-        return $this->cache->pushLog(
-            $this->transaction_key,
-            json_encode(
-                [
-                    'scope' => $scope,
-                    'data' => $logEntry
-                ]
-            )
-        );
-    }
-
-    /**
-     * @param string $info
-     *
-     * @return string
-     */
-    protected function pushInfo($info)
-    {
-        return $this->pushLog('info', $info);
-    }
 
     /**
      * @todo buffer
@@ -107,11 +56,12 @@ trait Handler
             );
         }
         $data = $this->getData($arguments[0]);
-        $this->transaction_key = $this->getTransactionKey($name, $data);
-        $result = $this->$name($data);
-        $this->pushLog('endpoint', $name);
-        $this->pushLog('request', $data);
-        $this->pushLog('response', $result);
+        $transaction_id = $this->getTransactionId($name, $data);
+        $this->cache->setTransactionId($transaction_id);
+        $result = $this->$name($transaction_id, $data);
+        $this->cache->pushLog('endpoint', $name);
+        $this->cache->pushLog('request', $data);
+        $this->cache->pushLog('response', $result);
         return $result;
     }
 }

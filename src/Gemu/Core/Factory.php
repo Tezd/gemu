@@ -2,6 +2,7 @@
 
 namespace Gemu\Core;
 
+use Gemu\Core\Cache\Proxy;
 use Gemu\Core\Error\NonExistingGatewayPart;
 use Predis\Client;
 
@@ -21,7 +22,7 @@ class Factory
     {
         $parts = $this->getGatewayParts($gatewayName);
         return new Gateway(
-            new $parts['emulator']($this->getCache()),
+            new $parts['emulator'](new Proxy($this->getCache())),
             new $parts['service']()
         );
     }

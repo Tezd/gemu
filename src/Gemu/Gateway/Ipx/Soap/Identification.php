@@ -8,56 +8,58 @@ use Gemu\Core\Gateway\EndPoint\Emulator\Handler;
  * Class Identification
  * @package Gemu\Gateway\Ipx\Soap
  */
-class Identification
+final class Identification
 {
     use Handler;
 
     /**
+     * @param string $transactionId
      * @param array $request
      *
      * @return array
      */
-    protected function createSession($request)
+    protected function createSession($transactionId, array $request)
     {
-        $params = $this->loadParams();
+        $params = $this->cache->loadParams();
         $params['return_url'] = $request['returnURL'];
-        $this->updateParams($params);
-        return array(
-            'correlationId' => $request['correlationId'],
+        $this->cache->updateParams($params);
+        return [
+            'correlationId' => $transactionId,
             'sessionId' => $request['returnURL'],
-            'redirectURL' => 'http://gemu.app/emulate/Ipx/redirectUrl?rid='.$request['correlationId'],
+            'redirectURL' => 'http://gemu.app/emulate/Ipx/redirectUrl?rid='.$transactionId,
             'responseCode' => 0,
             'responseMessage' => '',
-        );
+        ];
     }
 
     /**
-     * @param array $request
+     *
+     * @param string $transactionId
      *
      * @return array
      */
-    protected function checkStatus(array $request)
+    protected function checkStatus($transactionId)
     {
-        return array(
-            'correlationId' => $request['correlationId'],
+        return [
+            'correlationId' => $transactionId,
             'statusCode' => 1,
             'statusReasonCode' => 0,
             'statusMessage' => '',
             'responseCode' => 0,
             'responseMessage' => '',
-        );
+        ];
     }
 
     /**
-     * @param array $request
+     * @param string $transactionId
      *
      * @return array
      */
-    protected function finalizeSession(array $request)
+    protected function finalizeSession($transactionId)
     {
-        $params = $this->loadParams();
-        return array(
-            'correlationId' => $request['correlationId'],
+        $params = $this->cache->loadParams();
+        return [
+            'correlationId' => $transactionId,
             'transactionId' => uniqid(),
             'consumerId' => $params['config']['msisdn'],
             'operator' => $params['config']['operator'],
@@ -66,7 +68,7 @@ class Identification
             'countryName' => 'ESPAIN',
             'responseCode' => 0,
             'responseMessage' => '',
-        );
+        ];
     }
 
     /**
@@ -76,7 +78,7 @@ class Identification
      *
      * @return string
      */
-    protected function getTransactionKey($name, array $data)
+    protected function getTransactionId($name, array $data)
     {
         return $data['correlationId'];
     }

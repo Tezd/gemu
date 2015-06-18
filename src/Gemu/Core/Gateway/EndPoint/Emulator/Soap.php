@@ -2,6 +2,7 @@
 
 namespace Gemu\Core\Gateway\EndPoint\Emulator;
 
+use Gemu\Core\Cache;
 use Gemu\Core\Gateway\EndPoint\Emulator;
 use Symfony\Component\HttpFoundation\Response;
 
