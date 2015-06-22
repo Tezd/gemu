@@ -132,7 +132,7 @@ and src/Gemu/Gateway/{gatewayName}/Soap/Identification.php.
 ```
 
 Then we will add **protected** function into src/Gemu/Gateway/{gatewayName}/Soap/Identification.php 
-```php
+```php  
     protected function createSession($transactionId, array $request)
 ```
 7. Define getTransactionId and getData functions inside src/Gemu/Gateway/{gatewayName}/Emulator.php
