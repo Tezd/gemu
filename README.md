@@ -5,13 +5,13 @@
 There are 7 folders inside of emulator: app, bin, docker-compose, docs, src, vendor, web. 
 Each one of the folder serving its own purpose.
 
-app - templates, wsdls, configurations(soon to be added)
-bin - additional utility files such as composer.
-docker-compose - docker compose builds and configuration files.
-docs - files that are used for README.md
-src - project PHP code
-vendor - third party dependencies
-web - web root directory
+* app - templates, wsdls, configurations(soon to be added)
+* bin - additional utility files such as composer.
+* docker-compose - docker compose builds and configuration files.
+* docs - files that are used for README.md
+* src - project PHP code
+* vendor - third party dependencies
+* web - web root directory
 
 ## Root of evil
 
@@ -23,19 +23,19 @@ of each gateway.
 
 ![Core structure](docs/core_structure.jpg)
 
-Application.php - all configurations that needs to be done before application launches must be
+* Application.php - all configurations that needs to be done before application launches must be
 done here. Ex. creating twig templating engine.
-Cache.php - class that handles any interaction with cache.
-Factory.php - class that creates other classes that are needed for this project.
-Gateway.php - class wrapper that holds both service and emulator implementation. _Soon to be removed_
-Cache\Proxy.php - wrapper that will persist transaction_id inside so you wont need to pass transaction_id for 
+* Cache.php - class that handles any interaction with cache.
+* Factory.php - class that creates other classes that are needed for this project.
+* Gateway.php - class wrapper that holds both service and emulator implementation. _Soon to be removed_
+* Cache\Proxy.php - wrapper that will persist transaction_id inside so you wont need to pass transaction_id for 
 transaction based queries.
-Error - folder that holds gemu specific errors.
-Gateway\EndPoint.php - base class which resolves endpoint name from requests and tries to call it.
-Gateway\EndPoint\Emulator.php - base class that will handle emulation of HTTP based requests.
-Gateway\EndPoint\Service.php - base class that handles requests for non-gateway endpoints.
-Gateway\EndPoint\Emulator\Handler.php - trait that is responsible for logging requests&responses from emulated endpoints.
-Gateway\EndPoint\Emulator\Soap.php - base class that handles emulation of SOAP&HTTP requests.
+* Error - folder that holds gemu specific errors.
+* Gateway\EndPoint.php - base class which resolves endpoint name from requests and tries to call it.
+* Gateway\EndPoint\Emulator.php - base class that will handle emulation of HTTP based requests.
+* Gateway\EndPoint\Service.php - base class that handles requests for non-gateway endpoints.
+* Gateway\EndPoint\Emulator\Handler.php - trait that is responsible for logging requests&responses from emulated endpoints.
+* Gateway\EndPoint\Emulator\Soap.php - base class that handles emulation of SOAP&HTTP requests.
 
 ### How it works
 
@@ -45,9 +45,9 @@ Gateway\EndPoint\Emulator\Soap.php - base class that handles emulation of SOAP&H
 4. Gateway calls emulator or service object and pass it request.
 5. Function getEndPoint from emulator or service object returns method name. If failed throws BadEndPoint exception.
 6. If purpose is service it will call the method and return response.
-6a. If purpose is emulate and emulator is HTTP based. Then will trigger **Handler trait** \_\_call method
+    6a. If purpose is emulate and emulator is HTTP based. Then will trigger **Handler trait** \_\_call method
 and log request based on return of **getTransactionId** and **getData** functions.
-6b. If purpose is emulate and emulator is SOAP based. Then it will try to create SOAP server to handle the request if not
+    6b. If purpose is emulate and emulator is SOAP based. Then it will try to create SOAP server to handle the request if not
 request will be handled like an HTTP based one. Log request and response based on **getTransactionId** and **getData** functions
 in SOAP handler class or Emulator class based on previous step.
 
@@ -83,7 +83,7 @@ Extend Gateway.php from \Gemu\Core\Gateway\EndPoint\Emulator\Soap
 This class will handle SOAP queries. 
 4. Create mocked wsdl files inside app/wsdl/{gatewayName}
 Example. If we want to mock this soap service.
-```
+```XML
 <service name="IdentificationApiService">
     <port name="IdentificationApi31" binding="tns:IdentificationApiBinding">
         <soap:address location="http://gemu.app/emulate/Ipx/Identification"/>
@@ -94,7 +94,7 @@ We need to create wsdl file app/wsdl/{gatewayName}/Identification.wsdl
 and src/Gemu/Gateway/{gatewayName}/Soap/Identification.php. 
 **Note: wsdl file and SOAP handler files should be named same as mocked service**
 5. Add operator function into Service.php.
-```
+```PHP
 /**
  * Class Service
  * @package Gemu\Gateway\SomeGateway
