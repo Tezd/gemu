@@ -83,13 +83,13 @@ Extend Gateway.php from \Gemu\Core\Gateway\EndPoint\Emulator\Soap
 This class will handle SOAP queries. 
 4. Create mocked wsdl files inside app/wsdl/{gatewayName}
 Example. If we want to mock this soap service.
-````
+```
     <service name="IdentificationApiService">
-    <port name="IdentificationApi31" binding="tns:IdentificationApiBinding">
-    <soap:address location="http://gemu.app/emulate/Ipx/Identification"/>
-    </port>
+        <port name="IdentificationApi31" binding="tns:IdentificationApiBinding">
+            <soap:address location="http://gemu.app/emulate/Ipx/Identification"/>
+        </port>
     </service>
-````
+```
 We need to create wsdl file app/wsdl/{gatewayName}/Identification.wsdl 
 and src/Gemu/Gateway/{gatewayName}/Soap/Identification.php. 
 **Note: wsdl file and SOAP handler files should be named same as mocked service**
@@ -132,7 +132,7 @@ and src/Gemu/Gateway/{gatewayName}/Soap/Identification.php.
 ```
 
 Then we will add **protected** function into src/Gemu/Gateway/{gatewayName}/Soap/Identification.php 
-```
+```php
     protected function createSession($transactionId, array $request)
 ```
 7. Define getTransactionId and getData functions inside src/Gemu/Gateway/{gatewayName}/Emulator.php
