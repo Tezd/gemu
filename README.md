@@ -45,9 +45,9 @@ transaction based queries.
 4. Gateway calls emulator or service object and pass it request.
 5. Function getEndPoint from emulator or service object returns method name. If failed throws BadEndPoint exception.
 6. If purpose is service it will call the method and return response.
-    a. If purpose is emulate and emulator is HTTP based. Then will trigger **Handler trait** \_\_call method
+7. If purpose is emulate and emulator is HTTP based. Then will trigger **Handler trait** \_\_call method
 and log request based on return of **getTransactionId** and **getData** functions.
-    b. If purpose is emulate and emulator is SOAP based. Then it will try to create SOAP server to handle the request if not
+8. If purpose is emulate and emulator is SOAP based. Then it will try to create SOAP server to handle the request if not
 request will be handled like an HTTP based one. Log request and response based on **getTransactionId** and **getData** functions
 in SOAP handler class or Emulator class based on previous step.
 
@@ -83,18 +83,18 @@ Extend Gateway.php from \Gemu\Core\Gateway\EndPoint\Emulator\Soap
 This class will handle SOAP queries. 
 4. Create mocked wsdl files inside app/wsdl/{gatewayName}
 Example. If we want to mock this soap service.
-````xml
+``` xml
 <service name="IdentificationApiService">
     <port name="IdentificationApi31" binding="tns:IdentificationApiBinding">
         <soap:address location="http://gemu.app/emulate/Ipx/Identification"/>
     </port>
 </service>
-````
+```
 We need to create wsdl file app/wsdl/{gatewayName}/Identification.wsdl 
 and src/Gemu/Gateway/{gatewayName}/Soap/Identification.php. 
 **Note: wsdl file and SOAP handler files should be named same as mocked service**
 5. Add operator function into Service.php.
-```PHP
+``` php
 /**
  * Class Service
  * @package Gemu\Gateway\SomeGateway
