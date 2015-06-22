@@ -1,4 +1,5 @@
 # Gateway Emulator (gemu)
+
 ## Structure
 
 There are 6 folders inside of emulator: app, bin, docker-compose, src, web, vendor. 
@@ -11,13 +12,15 @@ src - project PHP code
 vendor - third party dependencies
 web - web root directory
 
-## Core of the project  
+## Root of evil
 
-Is src\Gemu folder. It has two folders named Core and Gateway. 
+Project php files are located in two folders named Core and Gateway. 
 Core folder holds all code that is generic and the gateway folder holds individual implementation 
 of each gateway.
 
+### Core or how it works
 
+![Core structure](docs/core_structure.jpg)
 
 
 ## UI
@@ -40,7 +43,7 @@ Extend Gateway.php from \Gemu\Core\Gateway\EndPoint\Emulator\Soap
 This class will handle SOAP queries. 
 4. Create mocked wsdl files inside app/wsdl/{gatewayName}
 Example. If we want to mock this soap service.
-```xml
+```
 <service name="IdentificationApiService">
     <port name="IdentificationApi31" binding="tns:IdentificationApiBinding">
         <soap:address location="http://gemu.app/emulate/Ipx/Identification"/>
@@ -51,7 +54,7 @@ We need to create wsdl file app/wsdl/{gatewayName}/Identification.wsdl
 and src/Gemu/Gateway/{gatewayName}/Soap/Identification.php. 
 **Note: wsdl file and SOAP handler files should be named same**
 5. Add operator function into Service.php.
-```php
+```
 /**
  * Class Service
  * @package Gemu\Gateway\SomeGateway
@@ -73,7 +76,7 @@ final class Service extends \Gemu\Core\Gateway\EndPoint\Service
 }
 ```
 6. Add handler functions to Gateway.php according to wsdl. 
-```xml
+```
 <binding name="IdentificationApiBinding" type="tns:IdentificationApiPort">
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
     <operation name="createSession">
@@ -89,7 +92,7 @@ final class Service extends \Gemu\Core\Gateway\EndPoint\Service
 ```
 
 Then we will add **protected** function into src/Gemu/Gateway/{gatewayName}/Soap/Identification.php 
-```php
+```
     protected function createSession($transactionId, array $request)
 ```
 7. Define getTransactionId and getData functions inside src/Gemu/Gateway/{gatewayName}/Emulator.php
@@ -100,8 +103,10 @@ and src/Gemu/Gateway/{gatewayName}/Soap/{soapHanlder}.php.
 
 1. Create folder with gateway name inside of src/Gemu/Gateway.
 2. Create two files called Service.php and Emulator.php.
+Extend Service.php from \Gemu\Core\Gateway\EndPoint\Service. 
+Extend Gateway.php from \Gemu\Core\Gateway\EndPoint\Emulator.
 3. Add operator function into Service.php.
-```php
+```
 /**
 * Class Service
 * @package Gemu\Gateway\SomeGateway
@@ -126,7 +131,7 @@ final class Service extends \Gemu\Core\Gateway\EndPoint\Service
 live url: http://somesite.com/scope/doAction?transId=12313&subs=12313
 mocked url: http://gemu.app/emulate/SomeGateway/doAction
 Inside of src/Gemu/Gateway/{gatewayName}/Emulator.php
-```php
+```
 protected function doAction($transaction_id, array $params)
 ```
 5. Define getTransactionId and getData functions inside src/Gemu/Gateway/{gatewayName}/Emulator.php
