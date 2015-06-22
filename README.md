@@ -83,52 +83,52 @@ Extend Gateway.php from \Gemu\Core\Gateway\EndPoint\Emulator\Soap
 This class will handle SOAP queries. 
 4. Create mocked wsdl files inside app/wsdl/{gatewayName}
 Example. If we want to mock this soap service.
-``` xml
-<service name="IdentificationApiService">
-    <port name="IdentificationApi31" binding="tns:IdentificationApiBinding">
-        <soap:address location="http://gemu.app/emulate/Ipx/Identification"/>
-    </port>
-</service>
+```
+    <service name="IdentificationApiService">
+        <port name="IdentificationApi31" binding="tns:IdentificationApiBinding">
+            <soap:address location="http://gemu.app/emulate/Ipx/Identification"/>
+        </port>
+    </service>
 ```
 We need to create wsdl file app/wsdl/{gatewayName}/Identification.wsdl 
 and src/Gemu/Gateway/{gatewayName}/Soap/Identification.php. 
 **Note: wsdl file and SOAP handler files should be named same as mocked service**
 5. Add operator function into Service.php.
-``` php
-/**
- * Class Service
- * @package Gemu\Gateway\SomeGateway
- */
-final class Service extends \Gemu\Core\Gateway\EndPoint\Service
-{
+``` 
     /**
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     * Class Service
+     * @package Gemu\Gateway\SomeGateway
      */
-    protected function operators()
+    final class Service extends \Gemu\Core\Gateway\EndPoint\Service
     {
-        return new JsonResponse(
-            [
-                '1' => 'DERP',
-                '2' => 'HERP',
-            ]
-        );
+        /**
+         * @return \Symfony\Component\HttpFoundation\JsonResponse
+         */
+        protected function operators()
+        {
+            return new JsonResponse(
+                [
+                    '1' => 'DERP',
+                    '2' => 'HERP',
+                ]
+            );
+        }
     }
-}
 ```
 6. Add handler functions to Gateway.php according to wsdl. 
 ```
-<binding name="IdentificationApiBinding" type="tns:IdentificationApiPort">
-    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
-    <operation name="createSession">
-        <soap:operation soapAction="tns:createSession"/>
-        <input>
-            <soap:body use="literal"/>
-        </input>
-        <output>
-            <soap:body use="literal"/>
-        </output>
-    </operation>
-</binding>
+    <binding name="IdentificationApiBinding" type="tns:IdentificationApiPort">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="createSession">
+            <soap:operation soapAction="tns:createSession"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+    </binding>
 ```
 
 Then we will add **protected** function into src/Gemu/Gateway/{gatewayName}/Soap/Identification.php 
