@@ -1,29 +1,17 @@
 gemu:
-  build: ..
-  hostname: gemu-hhvm
-#  links:
-#    - redis:redis.local
+  build: .
+  ports:
+    - 8080:80
+  links:
+    - redis:redis.local
   volumes:
     - /dev/log:/dev/log
-    - ../:/var/www/html/gemu
-    - ./etc/hhvm/php.ini:/etc/hhvm/php.ini:ro
+    - ../:/var/www/html
+#    - ./etc/apache2/mods-enabled/rewrite.load:/etc/apache2/mods-enabled/rewrite.load:ro
   working_dir: /var/www/html/gemu
 #  restart: always
 
+redis:
+    image: redis
+    restart: always
 
-nginx:
-  image: nginx
-  hostname: gemu-nginx
-  links:
-    - gemu
-  ports:
-    - "8080:80"
-#  restart: always
-  volumes:
-    - ./etc/nginx/sites-available/gemu.conf:/etc/nginx/conf.d/default.conf:ro
-    - ../web/assets/:/var/www/html/gemu/web/assets
-    - /dev/log:/dev/log
-
-#redis:
-#  image: redis
-#  restart: always

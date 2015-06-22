@@ -54,6 +54,6 @@ class Factory
      */
     public function getCache()
     {
-        return new Cache(new Client());
+        return new Cache(new Client(array('host'=>'redis.local')));
     }
 }
