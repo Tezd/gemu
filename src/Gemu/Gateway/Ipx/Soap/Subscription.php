@@ -2,16 +2,14 @@
 
 namespace Gemu\Gateway\Ipx\Soap;
 
-use Gemu\Core\Gateway\EndPoint\Emulator\Handler;
+use Gemu\Core\Gateway\EndPoint\Emulator;
 
 /**
  * Class Subscription
  * @package Gemu\Gateway\Ipx\Soap
  */
-final class Subscription
+final class Subscription extends Emulator
 {
-    use Handler;
-
     /**
      * @param string $transactionId
      *

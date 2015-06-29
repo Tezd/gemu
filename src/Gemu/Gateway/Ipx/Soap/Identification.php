@@ -2,16 +2,14 @@
 
 namespace Gemu\Gateway\Ipx\Soap;
 
-use Gemu\Core\Gateway\EndPoint\Emulator\Handler;
+use Gemu\Core\Gateway\EndPoint\Emulator;
 
 /**
  * Class Identification
  * @package Gemu\Gateway\Ipx\Soap
  */
-final class Identification
+final class Identification extends Emulator
 {
-    use Handler;
-
     /**
      * @param string $transactionId
      * @param array $request
