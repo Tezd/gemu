@@ -7,3 +7,6 @@ RUN apt-get update && \
 RUN a2enmod rewrite
 
 COPY . /var/www/html/
+
+RUN cd /var/www/html && \
+    php ./bin/composer install
