@@ -1,4 +1,5 @@
-FROM docker.sam-media.com/hhvm:latest
-
-#COPY . /var/www/html/gemu
-#WORKDIR /var/www/html/gemu
+FROM php:5.6-apache
+# Install modules
+RUN apt-get update && apt-get install -y libxml2-dev \
+    && docker-php-ext-install soap \
+    && a2enmod rewrite
