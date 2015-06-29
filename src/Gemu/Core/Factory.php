@@ -16,37 +16,42 @@ class Factory
     /**
      * @param string $gatewayName
      *
-     * @return \Gemu\Core\Gateway
+     * @return \Gemu\Core\Gateway\EndPoint
+     * @throws \Gemu\Core\Error\NonExistingGatewayPart
      */
-    public function getGateway($gatewayName)
+    public function getEmulator($gatewayName)
     {
-        $parts = $this->getGatewayParts($gatewayName);
-        return new Gateway(
-            new $parts['emulator'](new Proxy($this->getCache())),
-            new $parts['service']()
-        );
+        return $this->createGatewayEndPoint($gatewayName, '\\Emulator', [ new Proxy($this->getCache()) ]);
     }
 
     /**
      * @param string $gatewayName
      *
-     * @return array
+     * @return \Gemu\Core\Gateway\EndPoint
+     * @throws \Gemu\Core\Error\NonExistingGatewayPart
      */
-    protected function getGatewayParts($gatewayName)
+    public function getService($gatewayName)
     {
-        return @array_map(
-            function ($part) use ($gatewayName) {
-                $partClass = '\\Gemu\\Gateway\\'.$gatewayName.$part;
-                if (!class_exists($partClass)) {
-                    throw new NonExistingGatewayPart($partClass);
-                }
-                return $partClass;
-            },
-            [
-                'emulator' => '\\Emulator',
-                'service' => '\\Service'
-            ]
-        );
+        return $this->createGatewayEndPoint($gatewayName, '\\Service');
+    }
+
+    /**
+     * @param string $gatewayName
+     * @param string $endPointPart
+     * @param array $params
+     *
+     * @return \Gemu\Core\Gateway\EndPoint
+     * @throws \Gemu\Core\Error\NonExistingGatewayPart
+     */
+    protected function createGatewayEndPoint($gatewayName, $endPointPart, array $params = [])
+    {
+        $gatewayPartClass = '\\Gemu\\Gateway\\'.$gatewayName.$endPointPart;
+        if (!class_exists($gatewayPartClass)) {
+            throw new NonExistingGatewayPart($gatewayPartClass);
+        }
+        return $params ?
+            call_user_func_array(array($gatewayPartClass, 'getInstance'), $params) :
+            new $gatewayPartClass;
     }
 
     /**
@@ -54,6 +59,8 @@ class Factory
      */
     public function getCache()
     {
-        return new Cache(new Client(array('host'=>'redis.local')));
+        return new Cache(
+            new Client()
+        );
     }
 }

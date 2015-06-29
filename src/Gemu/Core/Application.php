@@ -48,11 +48,18 @@ final class Application extends Base
         });
     }
 
+    /**
+     * Emulate and service are separated because its easier to see the flow and code is more readable
+     */
     private function initRouting()
     {
-        $this->match('{purpose}/{gateway}/{endPoint}', function (Request $request, $purpose, $gateway) {
-            return $this['gemu.factory']->getGateway($gateway)->$purpose($request);
-        })->assert('purpose', 'emulate|service');
+        $this->match('emulate/{gateway}/{endPoint}', function (Request $request, $gateway) {
+            return $this['gemu.factory']->getEmulator($gateway)->handle($request);
+        });
+
+        $this->match('service/{gateway}/{endPoint}', function (Request $request, $gateway) {
+            return $this['gemu.factory']->getService($gateway)->handle($request);
+        });
 
         $this->get('/', 'gemu.controller:homepage')->bind('homepage');
 

@@ -12,24 +12,21 @@ use Symfony\Component\HttpFoundation\Request;
 abstract class EndPoint
 {
     /**
-     *
      * @param \Symfony\Component\HttpFoundation\Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Gemu\Core\Error\BadEndPoint
      */
-    protected function invokeEndPoint(Request $request)
+    public function handle(Request $request)
     {
-        if (($endPoint = $this->getEndPoint($request))
-            && is_callable(array($this, $endPoint))
-        ) {
+        if ($endPoint = $this->getEndPoint($request)) {
             return $this->__call($endPoint, array($request));
         }
         throw new BadEndPoint(static::class, $endPoint);
     }
 
     /**
-     * @param string$name
+     * @param string $name
      * @param array $arguments
      */
     abstract public function __call($name, array $arguments);
