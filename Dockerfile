@@ -5,3 +5,5 @@ RUN apt-get update &&
     docker-php-ext-install soap
 
 RUN a2enmod rewrite
+
+COPY . /var/www/html/
