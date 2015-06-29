@@ -70,6 +70,22 @@ abstract class Emulator extends EndPoint
     }
 
     /**
+     * @todo refactor
+     * @param string $name
+     * @param mixed $data
+     *
+     * @return \Gemu\Core\Gateway\EndPoint\Request
+     */
+    protected function createRequest($name, $data)
+    {
+        $data = $this->getData($data);
+        return new Request(
+            $this->getTransactionId($name, $data),
+            $data
+        );
+    }
+
+    /**
      * @todo buffer
      * @param string $name
      * @param array $arguments
@@ -85,13 +101,12 @@ abstract class Emulator extends EndPoint
                 )
             );
         }
-        $data = $this->getData($arguments[0]);
-        $transaction_id = $this->getTransactionId($name, $data);
-        $this->cache->setTransactionId($transaction_id);
-        $result = $this->$name($transaction_id, $data);
+        $request = $this->createRequest($name, $arguments[0]);
+        $this->cache->setTransactionId($request->getTransactionId());
+        $response = $this->$name($request);
         $this->cache->pushLog('endpoint', $name);
-        $this->cache->pushLog('request', $data);
-        $this->cache->pushLog('response', $result);
-        return $result;
+        $this->cache->pushLog('request', $request->all());
+        $this->cache->pushLog('response', $response);
+        return $response;
     }
 }

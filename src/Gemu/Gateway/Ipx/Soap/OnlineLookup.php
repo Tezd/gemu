@@ -3,6 +3,7 @@
 namespace Gemu\Gateway\Ipx\Soap;
 
 use Gemu\Core\Gateway\EndPoint\Emulator;
+use Gemu\Core\Gateway\EndPoint\Request;
 
 /**
  * Class OnlineLookup
@@ -11,11 +12,11 @@ use Gemu\Core\Gateway\EndPoint\Emulator;
 final class OnlineLookup extends Emulator
 {
     /**
-     * @param string $transactionId
+     * @param \Gemu\Core\Gateway\EndPoint\Request $request
      *
      * @return array
      */
-    protected function resolveClientIP($transactionId)
+    protected function resolveClientIP(Request $request)
     {
         $params = $this->cache->loadParams();
 
@@ -29,7 +30,7 @@ final class OnlineLookup extends Emulator
             $operator = '';
         }
         return [
-            'correlationId' => $transactionId,
+            'correlationId' => $request->getTransactionId(),
             'lookupId' => uniqid(),
             'operator' => $operator,
             'operatorNetworkCode' => 'NTWRK',
