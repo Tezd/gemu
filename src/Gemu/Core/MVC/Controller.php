@@ -28,9 +28,9 @@ class Controller
     {
         return $this->twig->render(
             'homepage.twig',
-            array(
+            [
                 'gateways' => $this->getGateways()
-            )
+            ]
         );
     }
 
@@ -47,7 +47,7 @@ class Controller
      */
     protected function getGateways()
     {
-        $gateways = array();
+        $gateways = [];
         $dh  = opendir(__DIR__.'/../../Gateway');
         while (false !== ($filename = readdir($dh))) {
             if (!in_array($filename, array('.', '..'))) {

@@ -3,8 +3,9 @@
 namespace Gemu\Gateway\NetM;
 
 use Gemu\Core\Gateway\EndPoint\Emulator as BaseEmulator;
+use Gemu\Core\Gateway\EndPoint\Request as EndPointRequest;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -21,7 +22,7 @@ final class Emulator extends BaseEmulator
      *
      * @return null|string
      */
-    protected function getEndPoint(Request $request)
+    protected function getEndPoint(SymfonyRequest $request)
     {
         return $request->get('RequestType') ?
             $request->get('RequestType') :
@@ -39,30 +40,30 @@ final class Emulator extends BaseEmulator
     }
 
     /**
-     * @param array $params
+     * @param \Gemu\Core\Gateway\EndPoint\Request $request
      */
-    protected function mergeParams(array &$params)
+    protected function mergeParams(EndPointRequest $request)
     {
-        $params = array_merge($params, $this->cache->loadParams());
-        $this->cache->updateParams($params);
+        $request->add($this->cache->loadParams());
+        $this->cache->updateParams($request->all());
     }
 
     /**
-     * @param string $transaction_id
-     * @param array $request
+     * @param \Gemu\Core\Gateway\EndPoint\Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function prepareSubscription($transaction_id, array $request)
+    protected function prepareSubscription(EndPointRequest $request)
     {
         $this->mergeParams($request);
 
+        $transaction_id = $request->getTransactionId();
         $paymentUrl = $this->makeUrl(
             $this->getLocalUrl('/emulate/NetM/paymenturl'),
             [ 'rid' => $transaction_id ]
         );
 
-        if (!empty($request['config']['low_balance'])) {
+        if (!empty($request->getDeep('config[low_balance]'))) {
             $statusCode = 305;
             $statusText = 'Low credit';
         } else {
@@ -70,7 +71,7 @@ final class Emulator extends BaseEmulator
             $statusText = 'OK';
         }
 
-        if ($request['config']['operator'] > 2) {
+        if ($request->getDeep('config[operator]') > 2) {
             $this->cache->pushInfo('Operator hosts optin1 and optin2 pages.');
             $paymentUrl = $this->makeUrl(
                 $this->getLocalUrl('/emulate/NetM/optin'),
@@ -79,7 +80,7 @@ final class Emulator extends BaseEmulator
         }
 
         // special case of o2 wifi
-        if ($request['config']['operator'] == 4 && $request['config']['flow'] == 'wifi') {
+        if ($request->getDeep('config[operator]') == 4 && $request->getDeep('config[flow]') == 'wifi') {
             $paymentUrl = $this->makeUrl(
                 $this->getLocalUrl('/emulate/NetM/o2msisdn'),
                 [ 'rid' => $transaction_id ]
@@ -103,16 +104,15 @@ HERE;
     }
 
     /**
-     * @param string $transaction_id
-     * @param array $params
+     * @param \Gemu\Core\Gateway\EndPoint\Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function checkTan($transaction_id, array $params)
+    protected function checkTan(EndPointRequest $request)
     {
-        $this->mergeParams($params);
-
-        if ($params['Tan'] == '1234') {
+        $this->mergeParams($request);
+        $transaction_id = $request->getTransactionId();
+        if ($request->get('Tan') == '1234') {
             $statusCode = 0;
             $statusText = 'PIN correct';
             $this->cache->pushInfo('Pin verified');
@@ -139,55 +139,55 @@ HERE;
     }
 
     /**
-     * @param string $transaction_id
-     * @param array $params
+     * @param \Gemu\Core\Gateway\EndPoint\Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function queryInfo($transaction_id, array $params)
+    protected function queryInfo(EndPointRequest $request)
     {
-        $this->mergeParams($params);
+        $this->mergeParams($request);
         $now = date('Y-m-d H:i:s');
 
-        if ($params['config']['flow'] == '3g' || $params['config']['operator'] == 4) {
-            $msisdn = $params['config']['msisdn'];
+        if ($request->getDeep('config[flow]') == '3g'
+            || $request->getDeep('config[operator]' == 4)) {
+            $msisdn = $request->getDeep('config[msisdn]');
         } else {
-            $msisdn = $params['Destination'];
+            $msisdn = $request->getDeep('Destination');
         }
 
-        if (!isset($params['Description'])) {
-            $params['Description'] = '';
-            $params['SubscriptionFee'] = '';
-        }
+//        if (!isset($params['Description'])) {
+//            $params['Description'] = '';
+//            $params['SubscriptionFee'] = '';
+//        }
 
         $s = <<<HERE
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <Response type="QueryInfo">
   <StatusCode>0</StatusCode>
   <StatusText>OK</StatusText>
-  <RequestID>$transaction_id</RequestID>
-  <TransactionID>$transaction_id</TransactionID>
-  <OperatorID>{$params['config']['operator']}</OperatorID>
-  <PaymentOperatorID>{$params['config']['operator']}</PaymentOperatorID>
-  <Description>{$params['Description']}</Description>
-  <Destination>${msisdn}</Destination>
+  <RequestID>{$request->getTransactionId()}</RequestID>
+  <TransactionID>{$request->getTransactionId()}</TransactionID>
+  <OperatorID>{$request->getDeep('config[operator]')}</OperatorID>
+  <PaymentOperatorID>{$request->getDeep('config[operator]')}</PaymentOperatorID>
+  <Description>{$request->get('Description')}</Description>
+  <Destination>$msisdn</Destination>
   <TransactionStatusCode>1</TransactionStatusCode>
   <TransactionStatusText>Transmitted TAN to MS, waiting for TAN input</TransactionStatusText>
   <Subscriptions>
     <Number>1</Number>
     <Subscription>
-      <SubscriptionID>$transaction_id</SubscriptionID>
+      <SubscriptionID>{$request->getTransactionId()}</SubscriptionID>
       <SubscriptionStatusCode>1</SubscriptionStatusCode>
       <SubscriptionStatusText>Subscription ready</SubscriptionStatusText>
       <ServiceID>web_de_abo</ServiceID>
       <ServiceType>web</ServiceType>
-      <SubscriptionFee>{$params['SubscriptionFee']}</SubscriptionFee>
+      <SubscriptionFee>{$request->get('SubscriptionFee')}</SubscriptionFee>
       <ItemFee>0</ItemFee>
       <Currency>EURO-CENT</Currency>
       <VAT>19.0</VAT>
       <OperatorID>1</OperatorID>
       <PaymentOperatorID>1</PaymentOperatorID>
-      <Description>{$params['Description']}</Description>
+      <Description>{$request->get('Description')}</Description>
       <StartTimestamp>$now</StartTimestamp>
       <LastPeriodFeeTimestamp>$now</LastPeriodFeeTimestamp>
     </Subscription>
@@ -198,50 +198,48 @@ HERE;
     }
 
     /**
-     * @param string $transaction_id
-     * @param array $params
+     * @param \Gemu\Core\Gateway\EndPoint\Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function prepareInfo($transaction_id, array $params)
+    protected function prepareInfo(EndPointRequest $request)
     {
-        $this->mergeParams($params);
+        $this->mergeParams($request);
         $infoUrl = $this->makeUrl($this->getLocalUrl('/emulate/NetM/detectinfo'));
         $s = <<<HERE
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <Response type="PrepareInfo">
   <StatusCode>0</StatusCode>
   <StatusText>OK</StatusText>
-  <RequestID>$transaction_id</RequestID>
-  <TransactionID>$transaction_id</TransactionID>
-  <InfoURL>${infoUrl}</InfoURL>
+  <RequestID>{$request->getTransactionId()}</RequestID>
+  <TransactionID>{$request->getTransactionId()}</TransactionID>
+  <InfoURL>$infoUrl</InfoURL>
 </Response>
 HERE;
         return new Response($s);
     }
 
     /**
-     * @param string $transaction_id
-     * @param array $params
+     * @param \Gemu\Core\Gateway\EndPoint\Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function paymentUrl($transaction_id, array $params)
+    protected function paymentUrl(EndPointRequest $request)
     {
-        $this->mergeParams($params);
+        $this->mergeParams($request);
 
-        $url = $this->makeUrl($this->getLocalUrl('/emulate/NetM/confirm'), [ 'rid' => $transaction_id ]);
+        $url = $this->makeUrl($this->getLocalUrl('/emulate/NetM/confirm'), [ 'rid' => $request->getTransactionId() ]);
 
-        if ($params['config']['operator'] > 2) {
+        if ($request->getDeep('config[operator]') > 2) {
             $fContent = file_get_contents('optin.html');
             $fContent = str_replace('$TITLE', 'Opt-in 2', $fContent);
-            $fContent = str_replace('$BANNER', $params['PurchaseBanner'], $fContent);
-            $fContent = str_replace('$IMAGE', $params['PurchaseImage'], $fContent);
+            $fContent = str_replace('$BANNER', $request->get('PurchaseBanner'), $fContent);
+            $fContent = str_replace('$IMAGE', $request->get('PurchaseImage'), $fContent);
             $fContent = str_replace('$URL', $url, $fContent);
             return new Response($fContent);
         }
 
-        $contents = file_get_contents($params['ConfirmationURL']);
+        $contents = file_get_contents($request->get('ConfirmationURL'));
         $contents = str_replace('$PRODUCT_URL', $url, $contents);
 
         $this->cache->pushInfo('Going to Optin2 page.');
@@ -250,20 +248,19 @@ HERE;
     }
 
     /**
-     * @param string $transaction_id
-     * @param array $params
+     * @param \Gemu\Core\Gateway\EndPoint\Request $request
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    protected function detectInfo($transaction_id, array $params)
+    protected function detectInfo(EndPointRequest $request)
     {
-        $this->mergeParams($params);
 
-        if ($params['config']['flow'] == '3g') {
+        $this->mergeParams($request);
+        if ($request->getDeep('config[flow]') == '3g') {
             $this->cache->pushInfo(
                 sprintf(
                     'MSISDN detected as %s. Initiating  3G flow.',
-                    $params['config']['msisdn']
+                    $request->getDeep('config[msisdn]')
                 )
             );
             $code = 0;
@@ -273,31 +270,33 @@ HERE;
         }
 
         return new RedirectResponse(
-            $params['CustomerURL'].'?'.http_build_query(
+            $request->get('CustomerURL').'?'.http_build_query(
                 [
-                    'trid' => $transaction_id,
+                    'trid' => $request->getTransactionId(),
                     'code' => $code,
-                    'rid' => $transaction_id
+                    'rid' => $request->getTransactionId()
                 ]
             )
         );
     }
 
     /**
-     * @param string $transaction_id
-     * @param array $params
+     * @param \Gemu\Core\Gateway\EndPoint\Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function optIn($transaction_id, array $params)
+    protected function optIn(EndPointRequest $request)
     {
-        $this->mergeParams($params);
-        $url = $this->makeUrl($this->getLocalUrl('/emulate/NetM/paymenturl'), [ 'rid' => $transaction_id ]);
+        $this->mergeParams($request);
+        $url = $this->makeUrl(
+            $this->getLocalUrl('/emulate/NetM/paymenturl'),
+            [ 'rid' => $request->getTransactionId() ]
+        );
 
         $fContent = file_get_contents('optin.html');
         $fContent = str_replace('$TITLE', 'Opt-in 1', $fContent);
-        $fContent = str_replace('$BANNER', $params['PurchaseBanner'], $fContent);
-        $fContent = str_replace('$IMAGE', $params['PurchaseImage'], $fContent);
+        $fContent = str_replace('$BANNER', $request->get('PurchaseBanner'), $fContent);
+        $fContent = str_replace('$IMAGE', $request->get('PurchaseImage'), $fContent);
         $fContent = str_replace('$URL', $url, $fContent);
         $this->cache->pushInfo('Going to Optin1 page.');
 
@@ -305,41 +304,39 @@ HERE;
     }
 
     /**
-     * @param string $transaction_id
-     * @param array $params
+     * @param \Gemu\Core\Gateway\EndPoint\Request $request
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    protected function o2msisdn($transaction_id, array $params)
+    protected function o2msisdn(EndPointRequest $request)
     {
-        $this->mergeParams($params);
+        $this->mergeParams($request);
         return new RedirectResponse(
             $this->makeUrl(
-                $params['ProductURL'],
+                $request->get('ProductURL'),
                 [
-                    'rid' => $transaction_id,
+                    'rid' => $request->getTransactionId(),
                     'code' => 0,
-                    'sid' => $transaction_id,
+                    'sid' => $request->getTransactionId(),
                 ]
             )
         );
     }
 
     /**
-     * @param string $transaction_id
-     * @param array $params
+     * @param \Gemu\Core\Gateway\EndPoint\Request $request
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    protected function confirm($transaction_id, array $params)
+    protected function confirm(EndPointRequest $request)
     {
-        $this->mergeParams($params);
-        $subId = substr($transaction_id, 0, 48);
+        $this->mergeParams($request);
+        $subId = substr($request->getTransactionId(), 0, 48);
         $this->cache->pushInfo('Subscription successful. Subscription ID: ' . $subId);
         return new RedirectResponse(
             $this->makeUrl(
-                $params['ProductURL'],
-                [ 'rid' => $transaction_id ]
+                $request->get('ProductURL'),
+                [ 'rid' => $request->getTransactionId() ]
             )
         );
     }

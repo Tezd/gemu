@@ -3,6 +3,7 @@
 namespace Gemu\Gateway\Ipx\Soap;
 
 use Gemu\Core\Gateway\EndPoint\Emulator;
+use Gemu\Core\Gateway\EndPoint\Request;
 
 /**
  * Class Subscription
@@ -11,16 +12,16 @@ use Gemu\Core\Gateway\EndPoint\Emulator;
 final class Subscription extends Emulator
 {
     /**
-     * @param string $transactionId
+     * @param \Gemu\Core\Gateway\EndPoint\Request $request
      *
      * @return array
      */
-    protected function createSubscription($transactionId)
+    protected function createSubscription(Request $request)
     {
         $params = $this->cache->loadParams();
         return [
-            'correlationId' => $transactionId,
-            'subscriptionId' => $transactionId,
+            'correlationId' => $request->getTransactionId(),
+            'subscriptionId' => $request->getTransactionId(),
             'subscriptionStatus' => 1,
             'subscriptionStatusMessage' => '',
             'operator' => $params['config']['operator'],
@@ -33,14 +34,14 @@ final class Subscription extends Emulator
     }
 
     /**
-     * @param string $transactionId
+     * @param \Gemu\Core\Gateway\EndPoint\Request $request
      *
      * @return array
      */
-    protected function getSubscriptionStatus($transactionId)
+    protected function getSubscriptionStatus(Request $request)
     {
         return [
-            'correlationId' => $transactionId,
+            'correlationId' => $request->getTransactionId(),
             'subscriptionStatus' => 1,
             'subscriptionStatusMessage' => 'The subscription is active and ready for use',
             'responseCode' => 0,
@@ -49,15 +50,15 @@ final class Subscription extends Emulator
     }
 
     /**
-     * @param string $transaction_id
+     * @param \Gemu\Core\Gateway\EndPoint\Request $request
      *
      * @return array
      */
-    protected function authorizePayment($transaction_id)
+    protected function authorizePayment(Request $request)
     {
         return [
-            'correlationId' => $transaction_id,
-            'sessionId' => $transaction_id,
+            'correlationId' => $request->getTransactionId(),
+            'sessionId' => $request->getTransactionId(),
             'authorizationLevel' => 1,
             'responseCode' => 0,
             'reasonCode' => 0,
@@ -67,15 +68,15 @@ final class Subscription extends Emulator
     }
 
     /**
-     * @param string $transaction_id
+     * @param \Gemu\Core\Gateway\EndPoint\Request $request
      *
      * @return array
      */
-    protected function capturePayment($transaction_id)
+    protected function capturePayment(Request $request)
     {
         return [
-            'correlationId' => $transaction_id,
-            'transactionId' => $transaction_id,
+            'correlationId' => $request->getTransactionId(),
+            'transactionId' => $request->getTransactionId(),
             'responseCode' => 0,
             'reasonCode' => 0,
             'responseMessage' => '',
