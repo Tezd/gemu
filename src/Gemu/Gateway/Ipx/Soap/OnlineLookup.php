@@ -2,16 +2,14 @@
 
 namespace Gemu\Gateway\Ipx\Soap;
 
-use Gemu\Core\Gateway\EndPoint\Emulator\Handler;
+use Gemu\Core\Gateway\EndPoint\Emulator;
 
 /**
  * Class OnlineLookup
  * @package Gemu\Gateway\Ipx\Soap
  */
-final class OnlineLookup
+final class OnlineLookup extends Emulator
 {
-    use Handler;
-
     /**
      * @param string $transactionId
      *

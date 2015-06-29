@@ -12,10 +12,6 @@ use Symfony\Component\HttpFoundation\Response;
  */
 abstract class Soap extends Emulator
 {
-    use Handler {
-        Handler::__call as parentCall;
-    }
-
     /**
      * @type \SoapServer
      */
@@ -72,6 +68,6 @@ abstract class Soap extends Emulator
     {
         return $this->createSoapServer($name) ?
             $this->handleSoap() :
-            $this->parentCall($name, $arguments);
+            parent::__call($name, $arguments);
     }
 }
