@@ -28,17 +28,6 @@ abstract class Emulator extends EndPoint
     }
 
     /**
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Gemu\Core\Error\BadEndPoint
-     */
-    public function emulate(Request $request)
-    {
-        return $this->invokeEndPoint($request);
-    }
-
-    /**
      * @param \Symfony\Component\HttpFoundation\Request $rawData
      *
      * @return array

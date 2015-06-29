@@ -51,7 +51,7 @@ abstract class Soap extends Emulator
     /**
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    private function handle()
+    private function handleSoap()
     {
         ob_start();
         $this->server->handle();
@@ -71,7 +71,7 @@ abstract class Soap extends Emulator
     public function __call($name, array $arguments)
     {
         return $this->createSoapServer($name) ?
-            $this->handle() :
+            $this->handleSoap() :
             $this->parentCall($name, $arguments);
     }
 }

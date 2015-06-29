@@ -12,17 +12,6 @@ use Symfony\Component\HttpFoundation\Request;
 abstract class Service extends EndPoint
 {
     /**
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Gemu\Core\Error\BadEndPoint
-     */
-    public function handle(Request $request)
-    {
-        return $this->invokeEndPoint($request);
-    }
-
-    /**
      * @param string $name
      * @param array $arguments
      */

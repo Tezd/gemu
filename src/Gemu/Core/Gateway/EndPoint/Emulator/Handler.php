@@ -5,6 +5,7 @@ namespace Gemu\Core\Gateway\EndPoint\Emulator;
 use Gemu\Core\Cache\Proxy;
 
 /**
+ * @todo move as part of Emulator base class
  * Class Handler
  * @package Gemu\Core\Gateway\EndPoint\Emulator
  */
@@ -21,6 +22,16 @@ trait Handler
     public function __construct(Proxy $cache)
     {
         $this->cache = $cache;
+    }
+
+    /**
+     * @param \Gemu\Core\Cache\Proxy $cache
+     *
+     * @return static
+     */
+    public static function getInstance(Proxy $cache)
+    {
+        return new static($cache);
     }
 
     /**
