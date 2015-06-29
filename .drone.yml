@@ -1,0 +1,7 @@
+image: docker.sam-media.com/build-up
+script:
+  - ./.drone/build.sh
+deploy:
+  bash:
+    script:
+      - ./.drone/deploy.sh
