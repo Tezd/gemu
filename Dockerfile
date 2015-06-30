@@ -1,4 +1,14 @@
-FROM docker.sam-media.com/hhvm:latest
+FROM php:5.6-apache
 
-#COPY . /var/www/html/gemu
-#WORKDIR /var/www/html/gemu
+RUN apt-get update && \
+    apt-get install -y libxml2-dev git && \
+    docker-php-ext-install soap
+
+RUN a2enmod rewrite
+
+ADD docker-compose/etc/php/conf.d/timezone.ini /usr/local/etc/php/conf.d/timezone.ini
+
+COPY . /var/www/html/
+
+RUN cd /var/www/html && \
+    php ./bin/composer install
