@@ -24,7 +24,7 @@ final class Identification extends Emulator
         return [
             'correlationId' => $request->getTransactionId(),
             'sessionId' => $request->get('returnURL'),
-            'redirectURL' => 'http://gemu.app/emulate/Ipx/redirectUrl?rid='.$request->getTransactionId(),
+            'redirectURL' => $this->getLocalUrl('/emulate/Ipx/redirectUrl', [ 'rid' => $request->getTransactionId() ]),
             'responseCode' => 0,
             'responseMessage' => '',
         ];

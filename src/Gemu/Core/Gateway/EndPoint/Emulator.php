@@ -57,6 +57,17 @@ abstract class Emulator extends EndPoint
     }
 
     /**
+     * @param string $endPoint
+     * @param array $params
+     *
+     * @return string
+     */
+    protected function getLocalUrl($endPoint, array $params = array())
+    {
+        return $this->makeUrl('http://'.$_SERVER['HTTP_HOST'].$_SERVER['SCRIPT_NAME'].$endPoint, $params);
+    }
+
+    /**
      * @param \Symfony\Component\HttpFoundation\Request $rawData
      *
      * @return array

@@ -29,15 +29,7 @@ final class Emulator extends BaseEmulator
             parent::getEndPoint($request);
     }
 
-    /**
-     * @param string $endPoint
-     *
-     * @return string
-     */
-    protected function getLocalUrl($endPoint)
-    {
-        return 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['SCRIPT_NAME'].$endPoint;
-    }
+
 
     /**
      * @param \Gemu\Core\Gateway\EndPoint\Request $request
@@ -58,8 +50,8 @@ final class Emulator extends BaseEmulator
         $this->mergeParams($request);
 
         $transaction_id = $request->getTransactionId();
-        $paymentUrl = $this->makeUrl(
-            $this->getLocalUrl('/emulate/NetM/paymenturl'),
+        $paymentUrl = $this->getLocalUrl(
+            '/emulate/NetM/paymenturl',
             [ 'rid' => $transaction_id ]
         );
 
@@ -73,16 +65,16 @@ final class Emulator extends BaseEmulator
 
         if ($request->getDeep('config[operator]') > 2) {
             $this->cache->pushInfo('Operator hosts optin1 and optin2 pages.');
-            $paymentUrl = $this->makeUrl(
-                $this->getLocalUrl('/emulate/NetM/optin'),
+            $paymentUrl = $this->getLocalUrl(
+                '/emulate/NetM/optin',
                 [ 'rid' => $transaction_id ]
             );
         }
 
         // special case of o2 wifi
         if ($request->getDeep('config[operator]') == 4 && $request->getDeep('config[flow]') == 'wifi') {
-            $paymentUrl = $this->makeUrl(
-                $this->getLocalUrl('/emulate/NetM/o2msisdn'),
+            $paymentUrl = $this->getLocalUrl(
+                '/emulate/NetM/o2msisdn',
                 [ 'rid' => $transaction_id ]
             );
         }
@@ -205,7 +197,7 @@ HERE;
     protected function prepareInfo(EndPointRequest $request)
     {
         $this->mergeParams($request);
-        $infoUrl = $this->makeUrl($this->getLocalUrl('/emulate/NetM/detectinfo'));
+        $infoUrl = $this->getLocalUrl('/emulate/NetM/detectinfo');
         $s = <<<HERE
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <Response type="PrepareInfo">
@@ -228,7 +220,10 @@ HERE;
     {
         $this->mergeParams($request);
 
-        $url = $this->makeUrl($this->getLocalUrl('/emulate/NetM/confirm'), [ 'rid' => $request->getTransactionId() ]);
+        $url = $this->getLocalUrl(
+            '/emulate/NetM/confirm',
+            [ 'rid' => $request->getTransactionId() ]
+        );
 
         if ($request->getDeep('config[operator]') > 2) {
             $fContent = file_get_contents('optin.html');
@@ -288,8 +283,8 @@ HERE;
     protected function optIn(EndPointRequest $request)
     {
         $this->mergeParams($request);
-        $url = $this->makeUrl(
-            $this->getLocalUrl('/emulate/NetM/paymenturl'),
+        $url = $this->getLocalUrl(
+            '/emulate/NetM/paymenturl',
             [ 'rid' => $request->getTransactionId() ]
         );
 
