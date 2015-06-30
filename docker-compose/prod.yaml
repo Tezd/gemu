@@ -1,0 +1,13 @@
+gemu:
+  image: docker.sam-media.com/gemu
+  ports:
+    - 80:80
+  links:
+    - redis:redis.local
+  volumes:
+    - /dev/log:/dev/log
+  restart: always
+
+redis:
+    image: redis
+    restart: always
