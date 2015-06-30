@@ -1,8 +1,9 @@
 FROM php:5.6-apache
 
 RUN apt-get update && \
-    apt-get install -y libxml2-dev git && \
-    docker-php-ext-install soap
+    apt-get install -y libxml2-dev zlib1g-dev git && \
+    docker-php-ext-install soap && \
+    docker-php-ext-install zip
 
 RUN a2enmod rewrite
 
