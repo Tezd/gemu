@@ -60,7 +60,7 @@ class Factory
     public function getCache()
     {
         return new Cache(
-            new Client()
+            new Client('tcp://redis.local:6379')
         );
     }
 }
