@@ -6,6 +6,8 @@ RUN apt-get update && \
 
 RUN a2enmod rewrite
 
+ADD docker-compose/etc/php/conf.d/timezone.ini /usr/local/etc/php/conf.d/timezone.ini
+
 COPY . /var/www/html/
 
 RUN cd /var/www/html && \
