@@ -1,0 +1,16 @@
+gemu:
+  build: ..
+  ports:
+    - 8080:80
+  links:
+    - redis:redis.local
+  volumes:
+    - /dev/log:/dev/log
+    - ../:/var/www/html
+#    - ./etc/apache2/mods-enabled/rewrite.load:/etc/apache2/mods-enabled/rewrite.load:ro
+  working_dir: /var/www/html
+#  restart: always
+
+redis:
+    image: redis
+    restart: always
